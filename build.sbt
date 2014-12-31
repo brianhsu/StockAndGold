@@ -15,7 +15,9 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "net.liftweb" %% "lift-webkit" % "2.6-RC2" % "compile->default",
-  "net.liftweb" %% "lift-mongodb" % "2.6-RC2"
+  "net.liftweb" %% "lift-mongodb" % "2.6-RC2",
+  "net.liftweb" %% "lift-mongodb-record" % "2.6-RC2"
+
 )
 
 port in container.Configuration := 8081
