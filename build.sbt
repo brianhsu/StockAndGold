@@ -10,7 +10,10 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature", "-language:impli
 
 libraryDependencies ++= Seq(
   "javax.servlet" % "servlet-api" % "2.5" % "provided",
-  "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container"
+  "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container",
+  "net.databinder.dispatch" %% "dispatch-core" % "0.11.2",
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
+  "org.apache.httpcomponents" % "httpclient" % "4.3.6"
 )
 
 libraryDependencies ++= Seq(

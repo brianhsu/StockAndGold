@@ -7,8 +7,10 @@ import net.liftweb.mongodb.MongoDB
 
 class Boot {
 
-  MongoDB.defineDb(DefaultConnectionIdentifier, new MongoClient, "stockAndGold")
+  def boot = {
+    MongoDB.defineDb(DefaultConnectionIdentifier, new MongoClient, "stockAndGold")
 
-  LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
-  LiftRules.addToPackages("code")
+    LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
+    LiftRules.addToPackages("code")
+  }
 }
