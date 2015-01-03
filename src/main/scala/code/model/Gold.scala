@@ -51,6 +51,7 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
 
       Gold.delete("bankName", "TaiwanBank")
       Gold.createRecord
+          .bankName("TaiwanBank")
           .bankSellPrice(bankSell)
           .bankBuyPrice(bankBuy)
           .priceUpdateAt(lastUpdateTime)

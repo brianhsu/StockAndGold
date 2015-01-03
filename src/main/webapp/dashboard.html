@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
+  <link href="/static/SemanticUI/semantic.min.css" type="text/css" rel="stylesheet"/>
+  <link href="/static/SemanticUI/custom.css" type="text/css" rel="stylesheet"/>
+  <link href="/static/jquery-ui-1.11.2/jquery-ui.min.css" type="text/css" rel="stylesheet">
+  <script src="/static/jquery-ui-1.11.2/jquery-1.11.2.min.js"></script>
+  <script src="/static/jquery-ui-1.11.2/jquery-ui.min.js"></script>
+  <script src="/static/jquery-ui-1.11.2/datepicker-zh-TW.js"></script>
+  <title>證卷理財小幫手</title>
+</head>
+<body>
+  <div class="ui fixed inverted main menu">
+    <div class="container">
+      <a class="title header item" href="/">證卷理財小幫手</a>
+    </div>
+  </div>
+      
+  <div style="padding-top:100px; padding-bottom:20px" class="ui one column page grid">
+    <div class="column">
+      <div data-lift="lift:msgs?showAll=true">
+        <lift:error_msg class="ui red sys message"></lift:error_msg>
+        <lift:warning_msg class="ui yellow sys message"></lift:warning_msg>
+        <lift:notice_msg class="ui green sys message"></lift:notice_msg>
+      </div>
+    </div>
+    <div class="column">
+      <form data-lift="AddGoldForm?form=ajax">
+        <table class="ui celled structured table"  data-lift="GoldTable">
+          <thead>
+            <tr><th colspan="10" class="center aligned">台灣銀行黃金存摺</th></tr>
+            <tr>
+              <th class="ui center aligned" colspan="3">銀行買入</th>
+              <th class="ui center aligned" colspan="3">銀行賣出</th>
+              <th class="ui center aligned" colspan="3">掛牌時間</th>
+            </tr>
+            <tr>
+              <td class="ui center aligned bankBuy" colspan="3">1234</td>
+              <td class="ui center aligned bankSell" colspan="3">1211</td>
+              <td class="ui center aligned priceUpdateAt" colspan="3">2014-11-22 11:22</td>
+            </tr>
+            <tr>
+              <th class="ui center aligned">買入日期</th>
+              <th class="ui center aligned">持有單位</th>
+              <th class="ui center aligned">成本單價</th>
+              <th class="ui center aligned">成本總計</th>
+              <th class="ui center aligned">現值</th>
+              <th class="ui center aligned">未實現損益</th>
+              <th class="ui center aligned">停損</th>
+              <th class="ui center aligned">停益</th>
+              <th class="ui center aligned">動作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row">
+              <td class="ui center aligned buyDate">2015-01-02</td>
+              <td class="ui center aligned quantity">3</td>
+              <td class="ui center aligned unitPrice">1021</td>
+              <td class="ui center aligned totalPrice">3063</td>
+              <td class="ui center aligned newTotalPrice">1234</td>
+              <td class="ui center aligned estEarningLoose">-27</td>
+              <td class="ui center aligned targetLoose">1000</td>
+              <td class="ui center aligned targetEarning">1000</td>
+              <td class="ui center aligned action">
+                <a><i class="ui dollar circular link icon"></i></a>
+                <a><i class="ui delete circular link icon"></i></a>
+              </td>
+            </tr>
+            <tr>
+              <td class="ui center aligned"><input type="text" id="addGoldDate" size="10"/></td>
+              <td class="ui center aligned"><input type="number" id="quantity" style="width: 4em" /></td>
+              <td class="ui center aligned"><input type="number" id="price" style="width: 4em"/></td>
+              <td class="ui center aligned" colspan="3"> - </td>
+              <td class="ui center aligned"><input type="number" id="targetLoose" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="number" id="targetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned"><button type="submit" id="addGoldButton" class="ui primary tiny button">新增</button></td>
+              <script type="text/javascript">
+                $('#addGoldDate').datepicker({"dateFormat": "yy-mm-dd"});
+              </script>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+
+</body>
+</html>  
+  

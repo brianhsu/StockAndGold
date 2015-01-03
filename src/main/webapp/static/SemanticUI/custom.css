@@ -1,0 +1,21 @@
+html, body {
+  padding: 0px;
+  background-color: #53c5c9;
+}
+
+.ui.main.menu {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  opacity: 0.8;
+}
+
+.sys.message ul {
+  list-style-type: none;
+  list-style-position: outside;
+  margin-left: -1em;
+}
+
+.del {
+  text-decoration:line-through;
+}
+

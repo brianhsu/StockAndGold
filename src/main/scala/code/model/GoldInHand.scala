@@ -12,11 +12,11 @@ class GoldInHand extends MongoRecord[GoldInHand] with ObjectIdPk[GoldInHand] {
 
   val userID = new StringField(this, 24)
 
+  val buyDate = new DateTimeField(this)
   val buyPrice = new DecimalField(this, 0)
   val quantity = new DecimalField(this, 0)
-  
-  val earningTarget = new OptionalIntField(this)
-  val lostTarget = new OptionalIntField(this)
+  val targetEarning = new IntField(this)
+  val targetLoose = new IntField(this)
   val updateAt = new DateTimeField(this)
 }
 
