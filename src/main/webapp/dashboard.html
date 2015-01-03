@@ -30,8 +30,8 @@
       </div>
     </div>
     <div class="column">
-      <form data-lift="AddGoldForm?form=ajax">
-        <table class="ui celled structured table"  data-lift="comet?type=GoldTable">
+      <div data-lift="comet?type=GoldTable">
+        <table class="ui celled structured table">
           <thead>
             <tr><th colspan="10" class="center aligned">台灣銀行黃金存摺</th></tr>
             <tr>
@@ -72,13 +72,18 @@
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+      <form data-lift="AddGoldForm?form=ajax">
+        <table class="ui celled structured table">
+          <tbody>
             <tr>
-              <td class="ui center aligned"><input type="text" id="addGoldDate" size="10"/></td>
-              <td class="ui center aligned"><input type="text" id="quantity" style="width: 4em" /></td>
-              <td class="ui center aligned"><input type="text" id="price" style="width: 4em"/></td>
-              <td class="ui center aligned" colspan="3"> - </td>
-              <td class="ui center aligned"><input type="text" id="targetLoose" style="width: 4em"/></td>
-              <td class="ui center aligned"><input type="text" id="targetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addGoldDate" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="買入數量" type="text" id="quantity" style="width: 4em" /></td>
+              <td class="ui center aligned"><input placeholder="單價" type="text" id="price" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="停損" type="text" id="targetLoose" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="停益" type="text" id="targetEarning" style="width: 4em"/></td>
               <td class="ui center aligned"><button type="submit" id="addGoldButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
                 $('#addGoldDate').datepicker({"dateFormat": "yy-mm-dd"});
@@ -87,11 +92,13 @@
           </tbody>
         </table>
       </form>
+
+      </form>
     </div>
 
     <div class="column">
-      <form data-lift="AddStockForm?form=ajax">
-        <table class="ui celled structured table" data-lift="comet?type=StockTable">
+      <div data-lift="comet?type=StockTable">
+        <table class="ui celled structured table">
           <thead>
             <tr><th class="ui center aligned" colspan="11">股票</th></tr>
             <tr>
@@ -130,19 +137,24 @@
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
             </tr>
+          </tbody>
+        </table>
+      </div>
+      <form data-lift="AddStockForm?form=ajax">
+        <table class="ui celled structured table">
+          <tbody>
             <tr>
               <td class="ui center algined">
                 <select id="addStockCode">
                   <option value=""></option>
                   <option value="1234" class="stockListItem">黑松</option>
                </select>
-              <td class="ui center aligned"><input type="text" id="addStockDate" size="10"/></td>
-              <td class="ui center aligned"><input type="text" id="addStockQuantity" size="10"/></td>
-              <td class="ui center aligned"><input type="text" id="addStockPrice" style="width: 4em"/></td>
-              <td class="ui center aligned"><input type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
-              <td class="ui center aligned" colspan="3"> - </td>
-              <td class="ui center aligned"><input type="text" id="addStockTargetLoose" style="width: 4em"/></td>
-              <td class="ui center aligned"><input type="text" id="addStockTargetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addStockDate" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="手續費" type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
+              <td class="ui center aligned"><input placeholder="停損" type="text" id="addStockTargetLoose" style="width: 4em"/></td>
+              <td class="ui center aligned"><input placeholder="停益" type="text" id="addStockTargetEarning" style="width: 4em"/></td>
               <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
                 $("#addStockDate").datepicker({"dateFormat": "yy-mm-dd"});
