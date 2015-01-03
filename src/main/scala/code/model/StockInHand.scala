@@ -23,5 +23,6 @@ class StockInHand extends MongoRecord[StockInHand] with ObjectIdPk[StockInHand] 
   val targetLoose = new IntField(this)
   val updateAt = new DateTimeField(this)
   val isNotified = new BooleanField(this, false)
+  val notifiedAt = new OptionalDateTimeField(this, None)
 }
 

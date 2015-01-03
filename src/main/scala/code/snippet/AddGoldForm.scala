@@ -1,6 +1,8 @@
 package code.snippet
 
 import code.model._
+import code.lib.DateToCalendar._
+
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 import net.liftweb.http.js.JsCmd
@@ -11,20 +13,7 @@ import java.text.SimpleDateFormat
 import net.liftweb.http.S
 import net.liftweb.common._
 
-object DateToCalendar {
-  import java.util.Calendar
-  import java.util.Date
-  implicit def apply(date: Date): Calendar = {
-    val calendar = Calendar.getInstance
-    calendar.setTime(date)
-    calendar
-  }
-}
-
-
 class AddGoldForm {
-
-  import DateToCalendar._
 
   private var dateString: String = _
   private var quantity: Box[Int] = Empty

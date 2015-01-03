@@ -10,10 +10,9 @@ import scala.util._
 import java.text.SimpleDateFormat
 import net.liftweb.http.S
 import net.liftweb.common._
+import code.lib.DateToCalendar._
 
 class AddStockForm {
-
-  import DateToCalendar._
 
   private var dateString: String = _
   private var stockCode: String = _

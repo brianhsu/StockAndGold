@@ -38,15 +38,16 @@
               <th class="ui center aligned" colspan="2">銀行買入</th>
               <th class="ui center aligned" colspan="2">銀行賣出</th>
               <th class="ui center aligned" colspan="2">掛牌時間</th>
-              <th class="ui center aligned" colspan="3">目標買價</th>
+              <th class="ui center aligned" colspan="4">目標買價</th>
             </tr>
             <tr>
               <td class="ui center aligned bankBuy" colspan="2">1234</td>
               <td class="ui center aligned bankSell" colspan="2">1211</td>
               <td class="ui center aligned priceUpdateAt" colspan="2">2014-11-22 11:22</td>
-              <td class="ui center aligned" colspan="3"><input type="text" id="buyTarget" /></td>
+              <td class="ui center aligned" colspan="4"><input type="text" id="buyTarget" /></td>
             </tr>
             <tr>
+              <th class="ui center aligned">已通知</th>
               <th class="ui center aligned">買入日期</th>
               <th class="ui center aligned">持有單位</th>
               <th class="ui center aligned">成本單價</th>
@@ -60,6 +61,7 @@
           </thead>
           <tbody>
             <tr class="row">
+              <td class="ui center aligned isNotified"></td>
               <td class="ui center aligned buyDate">2015-01-02</td>
               <td class="ui center aligned quantity">3</td>
               <td class="ui center aligned unitPrice">1021</td>
@@ -100,8 +102,9 @@
       <div data-lift="comet?type=StockTable">
         <table class="ui celled structured table">
           <thead>
-            <tr><th class="ui center aligned" colspan="11">股票</th></tr>
+            <tr><th class="ui center aligned" colspan="12">股票</th></tr>
             <tr>
+              <th class="ui center aligned">已通知</th>
               <th class="ui center aligned">股票</th>
               <th class="ui center aligned">日期</th>
               <th class="ui center aligned">持有股數</th>
@@ -117,6 +120,7 @@
           </thead>
           <tbody>
             <tr class="row">
+              <td class="ui center aligned isNotified"></td>
               <td class="ui center aligned stockName">高股息</td>
               <td class="ui center aligned buyDate">2015-01-02</td>
               <td class="ui center aligned quantity">3</td>
