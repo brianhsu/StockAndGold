@@ -7,9 +7,11 @@
   <link href="/static/SemanticUI/semantic.min.css" type="text/css" rel="stylesheet"/>
   <link href="/static/SemanticUI/custom.css" type="text/css" rel="stylesheet"/>
   <link href="/static/jquery-ui-1.11.2/jquery-ui.min.css" type="text/css" rel="stylesheet">
+  <link href="/static/select2-3.5.2/select2.css" type="text/css" rel="stylesheet">
   <script src="/static/jquery-ui-1.11.2/jquery-1.11.2.min.js"></script>
   <script src="/static/jquery-ui-1.11.2/jquery-ui.min.js"></script>
   <script src="/static/jquery-ui-1.11.2/datepicker-zh-TW.js"></script>
+  <script src="/static/select2-3.5.2/select2.js"></script>
   <title>證卷理財小幫手</title>
 </head>
 <body>
@@ -73,11 +75,11 @@
             </tr>
             <tr>
               <td class="ui center aligned"><input type="text" id="addGoldDate" size="10"/></td>
-              <td class="ui center aligned"><input type="number" id="quantity" style="width: 4em" /></td>
-              <td class="ui center aligned"><input type="number" id="price" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="text" id="quantity" style="width: 4em" /></td>
+              <td class="ui center aligned"><input type="text" id="price" style="width: 4em"/></td>
               <td class="ui center aligned" colspan="3"> - </td>
-              <td class="ui center aligned"><input type="number" id="targetLoose" style="width: 4em"/></td>
-              <td class="ui center aligned"><input type="number" id="targetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="text" id="targetLoose" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="text" id="targetEarning" style="width: 4em"/></td>
               <td class="ui center aligned"><button type="submit" id="addGoldButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
                 $('#addGoldDate').datepicker({"dateFormat": "yy-mm-dd"});
@@ -86,6 +88,67 @@
           </tbody>
         </table>
       </form>
+    </div>
+
+    <div class="column">
+      <form data-lift="AddStockForm?form=ajax">
+        <table class="ui celled structured table">
+          <thead>
+            <tr><th class="ui center aligned" colspan="11">股票</th></tr>
+            <tr>
+              <th class="ui center aligned">股票</th>
+              <th class="ui center algined">日期</th>
+              <th class="ui center aligned">持有股數</th>
+              <th class="ui center aligned">成本單價</th>
+              <th class="ui center aligned">成本總計</th>
+              <th class="ui center algined">成交價</th>
+              <th class="ui center aligned">現值</th>
+              <th class="ui center aligned">未實現損益</th>
+              <th class="ui center aligned">停損</th>
+              <th class="ui center aligned">停益</th>
+              <th class="ui center aligned">動作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row">
+              <td class="ui center aligned stockName">高股息</td>
+              <td class="ui center aligned buyDate">2015-01-02</td>
+              <td class="ui center aligned quantity">3</td>
+              <td class="ui center aligned unitPrice">1021</td>
+              <td class="ui center aligned totalPrice">3063</td>
+              <td class="ui center aligned newUnitPrice">12.2</td>
+              <td class="ui center aligned newTotalPrice">1234</td>
+              <td class="ui center aligned estEarningLoose">-27</td>
+              <td class="ui center aligned targetLoose">1000</td>
+              <td class="ui center aligned targetEarning">1000</td>
+              <td class="ui center aligned action">
+                <a><i class="ui dollar circular link icon"></i></a>
+                <a><i class="ui delete circular link icon"></i></a>
+              </td>
+            </tr>
+            <tr>
+              <td class="ui center algined">
+                <select id="addStockCode">
+                  <option value=""></option>
+                  <option value="1234" class="stockListItem">黑松</option>
+               </select>
+              <td class="ui center aligned"><input type="text" id="addStockDate" size="10"/></td>
+              <td class="ui center aligned"><input type="text" id="addStockQuantity" size="10"/></td>
+              <td class="ui center aligned"><input type="text" id="addStockPrice" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
+              <td class="ui center aligned" colspan="3"> - </td>
+              <td class="ui center aligned"><input type="text" id="addStockTargetLoose" style="width: 4em"/></td>
+              <td class="ui center aligned"><input type="text" id="addStockTargetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
+              <script type="text/javascript">
+                $("#addStockDate").datepicker({"dateFormat": "yy-mm-dd"});
+                $("#addStockCode").select2({width: "100px", allowCler: true, placeholder: "請選擇"});
+              </script>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+
     </div>
   </div>
 
