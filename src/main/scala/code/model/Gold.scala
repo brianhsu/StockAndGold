@@ -12,9 +12,10 @@ import scala.xml.NodeSeq
 import scala.xml.Node
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import scala.concurrent.Future
 
 object Gold extends Gold with MongoMetaRecord[Gold] {
-  def updateNewPrice() = {
+  def updateNewPrice(callback: => Any) = {
 
     def getGoldSavingHTML(lines: Seq[String]): Option[NodeSeq] = {
 
@@ -56,6 +57,8 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
           .bankBuyPrice(bankBuy)
           .priceUpdateAt(lastUpdateTime)
           .saveTheRecord()
+
+      callback
     }
 
   }
