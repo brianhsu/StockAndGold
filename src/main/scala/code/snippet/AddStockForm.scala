@@ -59,7 +59,9 @@ class AddStockForm {
         targetLoose <- this.targetLoose
         newRecord <- StockInHand.createRecord
                                .userID(currentUser.id.toString)
+                               .stockID(stockCode)
                                .buyDate(date)
+                               .buyFee(buyFee)
                                .buyPrice(price)
                                .quantity(quantity)
                                .targetEarning(targetEarning)
@@ -70,8 +72,11 @@ class AddStockForm {
 
       import code.comet._
       newRecord match {
-        case Some(record) => S.notice("成功新增股票")
-        case _ => S.error("無法存檔，請稍候再試")
+        case Some(record) => 
+          S.notice("成功新增股票")
+          StockTable ! UpdateTable
+        case _ => 
+          S.error("無法存檔，請稍候再試")
       }
     }
 

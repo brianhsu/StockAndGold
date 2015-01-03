@@ -14,13 +14,13 @@ class StockInHand extends MongoRecord[StockInHand] with ObjectIdPk[StockInHand] 
   val userID = new StringField(this, 24)
 
   val stockID = new StringField(this, 20)
-  val buyDate = new DateField(this)
+  val buyDate = new DateTimeField(this)
   val buyPrice = new DecimalField(this, 0)
   val buyFee = new IntField(this, 0)
   val quantity = new DecimalField(this, 0)
 
-  val targetEarning = new OptionalIntField(this)
-  val targetLoose = new OptionalIntField(this)
+  val targetEarning = new IntField(this)
+  val targetLoose = new IntField(this)
   val updateAt = new DateTimeField(this)
 }
 

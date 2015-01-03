@@ -72,7 +72,7 @@ class AddGoldForm {
       newRecord match {
         case Some(record) => 
           S.notice("成功新增持有黃金")
-          GoldTable ! GoldTable.UpdateTable
+          GoldTable ! UpdateTable
         case _ => 
           S.error("無法存檔，請稍候再試")
       }

@@ -34,5 +34,6 @@ class Boot {
     LiftRules.addToPackages("code")
     LiftRules.setSiteMap(siteMap)
     GoldTable.init()
+    StockTable.init()
   }
 }

@@ -19,9 +19,9 @@ import scala.concurrent.Future
 import scala.util._
 
 
-object GoldTable extends LiftActor with ListenerManager {
+case object UpdateTable
 
-  case object UpdateTable
+object GoldTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
 
@@ -109,6 +109,7 @@ object GoldTable extends LiftActor with ListenerManager {
   }
 }
 
+
 class GoldTable extends CometActor with CometListener {
 
   def registerWith = GoldTable
@@ -122,7 +123,7 @@ class GoldTable extends CometActor with CometListener {
 
   def onDelete(rowID: String, value: String): JsCmd = {
     GoldInHand.delete("_id", rowID)
-    this ! GoldTable.UpdateTable
+    this ! UpdateTable
   }
 
   def setBuyGoldTarget(value: String): JsCmd = {
@@ -167,8 +168,86 @@ class GoldTable extends CometActor with CometListener {
   }
 
   override def lowPriority = {
-    case GoldTable.UpdateTable => reRender()
+    case UpdateTable => reRender()
   }
+
+}
+
+
+object StockTable extends LiftActor with ListenerManager {
+
+  def createUpdate = UpdateTable
+
+  override def lowPriority = {
+    case UpdateTable => updateListeners()
+  }
+
+  def updateStockPriceInDB(): Unit = {
+    Stock.updateAllPrice {
+      updateListeners()
+      Schedule(() => updateStockPriceInDB(), 30.seconds)
+    }
+  }
+
+  def init() {
+    updateStockPriceInDB()
+  }
+
+}
+
+
+class StockTable extends CometActor with CometListener{
+
+  def registerWith = StockTable
+
+
+  private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd")
+  private val dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  private def stockInHands = User.currentUser.map { user =>
+    StockInHand.findAll("userID", user.id.get.toString)
+               .sortWith(_.buyDate.get.getTime.getTime < _.buyDate.get.getTime.getTime)
+  }
+
+  def onDelete(rowID: String, value: String): JsCmd = {
+    StockInHand.delete("_id", rowID)
+    this ! UpdateTable
+  }
+
+  def render = {
+
+    ".row" #> stockInHands.getOrElse(Nil).map { stock =>
+
+      val totalPrice = (stock.buyPrice.get * stock.quantity.get + stock.buyFee.get).toInt
+      val currentPrice = Stock.find("code", stock.stockID.toString).map(_.currentPrice.get)
+      val newTotalPrice = currentPrice.map(x => (stock.quantity.get * x).toInt)
+      val difference = newTotalPrice.map(_ - totalPrice)
+      val sellCost = newTotalPrice.map { price =>
+        ((price * (0.1425 / 100)).round + (price * (0.3 / 100)).round)
+      }
+      val priceUpdateAt = Stock.find("code", stock.stockID.toString).map(_.priceUpdateAt.get)
+
+      ".row [id]" #> s"stock-row-${stock.id}" &
+      ".stockName *" #> Stock.stockCodeToName.get(stock.stockID.toString).getOrElse("Unknown") &
+      ".buyDate *" #> dateFormatter.format(stock.buyDate.get.getTime) &
+      ".quantity *" #> stock.quantity &
+      ".unitPrice *" #> stock.buyPrice &
+      ".totalPrice *" #> totalPrice &
+      ".currentPrice *" #> currentPrice.map(_.toString).getOrElse("-") &
+      ".newTotalPrice *" #> newTotalPrice.map(_.toString).getOrElse("-") &
+      ".priceUpdateAt *" #> priceUpdateAt.map(x => dateTimeFormatter.format(x.getTime)).getOrElse("-") &
+      ".estEarningLoose *" #> difference.map(_.toString).getOrElse(" - ") &
+      ".sellCost *" #> sellCost.map(_.toString).getOrElse("-") &
+      ".targetLoose *" #> stock.targetLoose &
+      ".targetEarning *" #> stock.targetEarning &
+      ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(stock.id.toString, _))
+    }
+
+  }
+
+  override def lowPriority = {
+    case UpdateTable => reRender()
+  }
+
 
 }
 

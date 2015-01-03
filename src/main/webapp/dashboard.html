@@ -69,7 +69,6 @@
               <td class="ui center aligned targetLoose">1000</td>
               <td class="ui center aligned targetEarning">1000</td>
               <td class="ui center aligned action">
-                <a><i class="ui dollar circular link icon"></i></a>
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
             </tr>
@@ -92,18 +91,18 @@
 
     <div class="column">
       <form data-lift="AddStockForm?form=ajax">
-        <table class="ui celled structured table">
+        <table class="ui celled structured table" data-lift="comet?type=StockTable">
           <thead>
             <tr><th class="ui center aligned" colspan="11">股票</th></tr>
             <tr>
               <th class="ui center aligned">股票</th>
-              <th class="ui center algined">日期</th>
+              <th class="ui center aligned">日期</th>
               <th class="ui center aligned">持有股數</th>
               <th class="ui center aligned">成本單價</th>
               <th class="ui center aligned">成本總計</th>
-              <th class="ui center algined">成交價</th>
+              <th class="ui center aligned">成交價<br/>掛牌時間</th>
               <th class="ui center aligned">現值</th>
-              <th class="ui center aligned">未實現損益</th>
+              <th class="ui center aligned">未實現損益<br/>預估交易成本</th>
               <th class="ui center aligned">停損</th>
               <th class="ui center aligned">停益</th>
               <th class="ui center aligned">動作</th>
@@ -116,13 +115,18 @@
               <td class="ui center aligned quantity">3</td>
               <td class="ui center aligned unitPrice">1021</td>
               <td class="ui center aligned totalPrice">3063</td>
-              <td class="ui center aligned newUnitPrice">12.2</td>
-              <td class="ui center aligned newTotalPrice">1234</td>
-              <td class="ui center aligned estEarningLoose">-27</td>
+              <td class="ui center aligned">
+                <div class="currentPrice">12.2</div>
+                <div class="priceUpdateAt" style="margin-top: 1em;">2014-11-02 22:11</div>
+              </td>
+              <td class="ui center aligned newTotalPrice"></td>
+              <td class="ui center aligned">
+                <div class="estEarningLoose">1234</div>
+                <div class="sellCost"></div>
+              </td>
               <td class="ui center aligned targetLoose">1000</td>
               <td class="ui center aligned targetEarning">1000</td>
               <td class="ui center aligned action">
-                <a><i class="ui dollar circular link icon"></i></a>
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
             </tr>
