@@ -1,5 +1,7 @@
 package code.comet
 
+import org.bone.soplurk.api._
+import org.bone.soplurk.constant.Qualifier
 import java.text.SimpleDateFormat
 import code.model._
 import net.liftweb.util._
@@ -13,6 +15,8 @@ import net.liftweb.http.CometListener
 import net.liftweb.http.ListenerManager
 import net.liftweb.actor._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import scala.util._
 
 object GoldTable extends LiftActor with ListenerManager {
 
@@ -20,10 +24,62 @@ object GoldTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
 
+  def notifyTarget(newPrice: Gold) = Future {
+
+    def getDifference(goldInHand: GoldInHand) = {
+      val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
+      val newTotalPrice = newPrice.bankBuyPrice.get * goldInHand.quantity.get
+      newTotalPrice - oldTotalPrice
+    }
+
+    def isReachedLimit(goldInHand: GoldInHand) = {
+      val difference = getDifference(goldInHand)
+      if (difference < 0) {
+        difference <= goldInHand.targetLoose.get.abs * -1
+      } else {
+        difference >= goldInHand.targetEarning.get
+      }
+    }
+
+    val notifiedList = GoldInHand.findAll("isNotified", false).filter(isReachedLimit)
+    val appKey = "oGjxYZZMHfPE"
+    val appSecret = "DpVRPOBriTqHMZIFjxjgpuTDk55LiIlK"
+
+    for {
+      goldInHand <- notifiedList
+      user <- User.find(goldInHand.userID.get)
+    } {
+      val plurkAPI = PlurkAPI.withAccessToken(
+        appKey, appSecret, 
+        user.plurkToken.get, user.plurkSecret.get
+      )
+
+      val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
+      val difference = getDifference(goldInHand)
+      val newTotalPrice = newPrice.bankBuyPrice.get * goldInHand.quantity.get
+
+      val message = 
+        s"買入價為 ${goldInHand.buyPrice} 的 ${goldInHand.quantity} 克黃金，" +
+        s"原價 $oldTotalPrice ，目前市值為 $newTotalPrice ，價差為 $difference，" +
+        s"已達設定停損 / 停益點 ${goldInHand.targetLoose} / ${goldInHand.targetEarning}"
+
+      val newPlurk = plurkAPI.Timeline.plurkAdd(
+        message, Qualifier.Says, List(user.plurkUserID.get)
+      )
+
+      println("SendNotification:" + newPlurk)
+
+      newPlurk match {
+        case Success(plurk) => goldInHand.isNotified(true).saveTheRecord()
+        case _ =>
+      }
+    }
+  }
+
   def updateGoldPriceInDB() {
-    Gold.updateNewPrice {
+    Gold.updateNewPrice { newPrice =>
       updateListeners()
-      Schedule(() => updateGoldPriceInDB(), 1000 * 60)
+      notifyTarget(newPrice).foreach(_ => Schedule(() => updateGoldPriceInDB(), 1000 * 60))
     }
   }
 
@@ -31,8 +87,9 @@ object GoldTable extends LiftActor with ListenerManager {
     case UpdateTable => updateListeners()
   }
 
-  updateGoldPriceInDB()
-
+  def init() {
+    updateGoldPriceInDB()
+  }
 }
 
 class GoldTable extends CometActor with CometListener {
@@ -62,7 +119,7 @@ class GoldTable extends CometActor with CometListener {
 
       val totalPrice = (gold.buyPrice.get * gold.quantity.get)
       val newTotalPrice = currentPrice.map(_.bankBuyPrice.get * gold.quantity.get)
-      val difference = newTotalPrice.map(totalPrice - _)
+      val difference = newTotalPrice.map(_ - totalPrice)
 
       ".row [id]" #> s"gold-row-${gold.id}" &
       ".buyDate *" #> dateFormatter.format(gold.buyDate.get.getTime) &

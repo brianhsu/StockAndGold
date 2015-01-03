@@ -18,5 +18,6 @@ class GoldInHand extends MongoRecord[GoldInHand] with ObjectIdPk[GoldInHand] {
   val targetEarning = new IntField(this)
   val targetLoose = new IntField(this)
   val updateAt = new DateTimeField(this)
+  val isNotified = new BooleanField(this, false)
 }
 

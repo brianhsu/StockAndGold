@@ -15,6 +15,7 @@ object User extends User with MongoMetaRecord[User] {
 class User extends MongoRecord[User] with ObjectIdPk[User] {
   def meta = User
 
+  val plurkUserID = new LongField(this)
   val nickname = new StringField(this, 200)
   val plurkToken = new StringField(this, 100)
   val plurkSecret = new StringField(this, 100)

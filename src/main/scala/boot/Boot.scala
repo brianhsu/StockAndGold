@@ -1,6 +1,8 @@
 package bootstrap.liftweb
 
+import code.comet._
 import code.model.User
+
 import com.mongodb.MongoClient
 
 import net.liftweb.util.DefaultConnectionIdentifier
@@ -31,5 +33,6 @@ class Boot {
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
     LiftRules.addToPackages("code")
     LiftRules.setSiteMap(siteMap)
+    GoldTable.init()
   }
 }
