@@ -8,15 +8,19 @@ import net.liftweb.http.S
 import net.liftweb.http.SessionVar
 import net.liftweb.sitemap.Loc.EarlyResponse
 import scala.util.Success
-
+import net.liftweb.util.Props
 
 object Login {
 
   object CurrentPlurkAPI extends SessionVar[Option[PlurkAPI]](None)
 
-  val appKey = "oGjxYZZMHfPE"
-  val appSecret = "DpVRPOBriTqHMZIFjxjgpuTDk55LiIlK"
-  val callback = "http://localhost:8081/authPlurk"
+  val appKey = Props.get("PLURK_APIKEY").getOrElse("InvalidKey")
+  val appSecret = Props.get("PLURK_APISECRET").getOrElse("InvalidKey")
+  val callback = Props.get("CALLBACK", S.hostAndPath + "/authPlurk")
+
+  println(Props.mode)
+  println("appKey:" + appKey)
+  println("callback:" + callback)
 
   val redirectToPlurk = EarlyResponse { () =>
     val plurkAPI = PlurkAPI.withCallback(appKey, appSecret, callback)
