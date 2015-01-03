@@ -29,18 +29,20 @@
     </div>
     <div class="column">
       <form data-lift="AddGoldForm?form=ajax">
-        <table class="ui celled structured table"  data-lift="GoldTable">
+        <table class="ui celled structured table"  data-lift="comet?type=GoldTable">
           <thead>
             <tr><th colspan="10" class="center aligned">台灣銀行黃金存摺</th></tr>
             <tr>
-              <th class="ui center aligned" colspan="3">銀行買入</th>
-              <th class="ui center aligned" colspan="3">銀行賣出</th>
-              <th class="ui center aligned" colspan="3">掛牌時間</th>
+              <th class="ui center aligned" colspan="2">銀行買入</th>
+              <th class="ui center aligned" colspan="2">銀行賣出</th>
+              <th class="ui center aligned" colspan="2">掛牌時間</th>
+              <th class="ui center aligned" colspan="3">目標買價</th>
             </tr>
             <tr>
-              <td class="ui center aligned bankBuy" colspan="3">1234</td>
-              <td class="ui center aligned bankSell" colspan="3">1211</td>
-              <td class="ui center aligned priceUpdateAt" colspan="3">2014-11-22 11:22</td>
+              <td class="ui center aligned bankBuy" colspan="2">1234</td>
+              <td class="ui center aligned bankSell" colspan="2">1211</td>
+              <td class="ui center aligned priceUpdateAt" colspan="2">2014-11-22 11:22</td>
+              <td class="ui center aligned" colspan="3"><input type="text" id="buyTarget" /></td>
             </tr>
             <tr>
               <th class="ui center aligned">買入日期</th>

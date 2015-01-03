@@ -33,13 +33,14 @@ object Login {
 
     def updateUserTokenInfo(plurkAPI: PlurkAPI): Option[User] = {
 
-      def insertOrUpdate(nickname: String, token: String, secret: String): Box[User] = {
+      def insertOrUpdate(plurkUserID: Long, nickname: String, token: String, secret: String): Box[User] = {
 
         User.find("nickname", nickname) match {
           case Empty => 
 
             User.createRecord
                 .nickname(nickname)
+                .plurkUserID(plurkUserID)
                 .plurkToken(token)
                 .plurkSecret(secret)
                 .saveTheRecord()
@@ -58,7 +59,8 @@ object Login {
         (userInfo, _, _) <- plurkAPI.Users.currUser.toOption
         token <- plurkAPI.getAccessToken
         nickname = userInfo.basicInfo.nickname
-        currentUser <- insertOrUpdate(nickname, token.getToken, token.getSecret)
+        plurkUserID = userInfo.basicInfo.id
+        currentUser <- insertOrUpdate(plurkUserID, nickname, token.getToken, token.getSecret)
       } yield currentUser
     }
 

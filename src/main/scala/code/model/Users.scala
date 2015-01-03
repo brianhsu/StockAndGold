@@ -1,5 +1,9 @@
 package code.model
 
+import org.bone.soplurk.api._
+import org.bone.soplurk.constant._
+
+
 import net.liftweb.mongodb.record.MongoRecord
 import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.field._
@@ -15,9 +19,20 @@ object User extends User with MongoMetaRecord[User] {
 class User extends MongoRecord[User] with ObjectIdPk[User] {
   def meta = User
 
+  val plurkUserID = new LongField(this)
   val nickname = new StringField(this, 200)
   val plurkToken = new StringField(this, 100)
   val plurkSecret = new StringField(this, 100)
+
+  val buyGoldAt = new OptionalIntField(this, None)
+  val isBuyGoldNotified = new BooleanField(this, false)
+
+  def postPlurk(message: String) = {
+    val appKey = "oGjxYZZMHfPE"
+    val appSecret = "DpVRPOBriTqHMZIFjxjgpuTDk55LiIlK"
+    val plurkAPI = PlurkAPI.withAccessToken(appKey, appSecret, plurkToken.get, plurkSecret.get)
+    plurkAPI.Timeline.plurkAdd(message, Qualifier.Says, List(plurkUserID.get))
+  }
 }
 
 
