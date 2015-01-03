@@ -13,26 +13,27 @@ import net.liftweb.record.field._
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
  
 object Stock extends Stock with MongoMetaRecord[Stock] {
 
   case class StockInfo(code: String, name: String, isTaiwan50: Boolean, isTaiwan100: Boolean)
 
   val stockTable = List(
-    StockInfo("50", "台灣50", false, false),
-    StockInfo("51", "中100", false, false),
-    StockInfo("52", "FB科技", false, false),
-    StockInfo("53", "寶電子", false, false),
-    StockInfo("54", "台商50", false, false),
-    StockInfo("55", "寶金融", false, false),
-    StockInfo("56", "高股息", false, false),
-    StockInfo("57", "FB摩台", false, false),
-    StockInfo("58", "FB發達", false, false),
-    StockInfo("59", "FB金融", false, false),
-    StockInfo("60", "新台灣", false, false),
-    StockInfo("61", "寶滬深", false, false),
-    StockInfo("80", "恆中國", false, false),
-    StockInfo("81", "恆香港", false, false),
+    StockInfo("0050", "台灣50", false, false),
+    StockInfo("0051", "中100", false, false),
+    StockInfo("0052", "FB科技", false, false),
+    StockInfo("0053", "寶電子", false, false),
+    StockInfo("0054", "台商50", false, false),
+    StockInfo("0055", "寶金融", false, false),
+    StockInfo("0056", "高股息", false, false),
+    StockInfo("0057", "FB摩台", false, false),
+    StockInfo("0058", "FB發達", false, false),
+    StockInfo("0059", "FB金融", false, false),
+    StockInfo("0060", "新台灣", false, false),
+    StockInfo("0061", "寶滬深", false, false),
+    StockInfo("0080", "恆中國", false, false),
+    StockInfo("0081", "恆香港", false, false),
     StockInfo("1101", "台泥", true, false),
     StockInfo("1102", "亞泥", true, false),
     StockInfo("1103", "嘉泥", false, false),
@@ -1497,9 +1498,12 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
     StockInfo("01008T", "駿馬 R1", false, false)
   )
 
-  def updateAllPrice() = {
+  val stockCodeToName = stockTable.map(x => x.code -> x.name).toMap
+ 
+  def updateAllPrice(callback: => Any) = {
     val allStockIDs = StockInHand.useColl(_.distinct("stockID"))
     allStockIDs.foreach(stockID => updatePrice(stockID.toString))
+    callback
   }
 
   def updatePrice(stockCode: String) = {
@@ -1507,7 +1511,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
     val infoURL = s"http://www.google.com/finance/info?infotype=infoquoteall&q=TPE:$stockCode"
     val contentFuture = DataGetter(infoURL)
 
-    def updatePriceInDB(responseContent: String) {
+    def updatePriceInDB(responseContent: String) = Try {
       val JArray(List(jsonData)) = parse(responseContent.drop(3))
       val JString(currentPrice) = jsonData \\ "l"
       val JString(minPrice) = jsonData \\ "lo"

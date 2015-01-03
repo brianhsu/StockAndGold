@@ -17,11 +17,11 @@ import org.bone.soplurk.constant.Qualifier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util._
+import code.lib.DateToCalendar._
 
+case object UpdateTable
 
 object GoldTable extends LiftActor with ListenerManager {
-
-  case object UpdateTable
 
   def createUpdate = UpdateTable
 
@@ -73,7 +73,9 @@ object GoldTable extends LiftActor with ListenerManager {
       val newPlurk = user.postPlurk(message)
 
       newPlurk match {
-        case Success(plurk) => goldInHand.isNotified(true).saveTheRecord()
+        case Success(plurk) => 
+          goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
+          updateListeners()
         case _ =>
       }
     }
@@ -109,6 +111,7 @@ object GoldTable extends LiftActor with ListenerManager {
   }
 }
 
+
 class GoldTable extends CometActor with CometListener {
 
   def registerWith = GoldTable
@@ -122,7 +125,7 @@ class GoldTable extends CometActor with CometListener {
 
   def onDelete(rowID: String, value: String): JsCmd = {
     GoldInHand.delete("_id", rowID)
-    this ! GoldTable.UpdateTable
+    this ! UpdateTable
   }
 
   def setBuyGoldTarget(value: String): JsCmd = {
@@ -138,6 +141,7 @@ class GoldTable extends CometActor with CometListener {
 
   def render = {
 
+    println("Inside gold table render")
     val currentPrice = Gold.find("bankName", "TaiwanBank")
     def formatTimestamp(gold: Gold) = dateTimeFormatter.format(gold.priceUpdateAt.get.getTime)
 
@@ -152,6 +156,12 @@ class GoldTable extends CometActor with CometListener {
       val totalPrice = (gold.buyPrice.get * gold.quantity.get)
       val newTotalPrice = currentPrice.map(_.bankBuyPrice.get * gold.quantity.get)
       val difference = newTotalPrice.map(_ - totalPrice)
+      def formatNotifiedTime(calendar: java.util.Calendar) = {
+        val dateTimeString = dateTimeFormatter.format(calendar.getTime)
+        <div>V</div>
+        <div>{dateTimeString}</div>
+      }
+
 
       ".row [id]" #> s"gold-row-${gold.id}" &
       ".buyDate *" #> dateFormatter.format(gold.buyDate.get.getTime) &
@@ -162,13 +172,13 @@ class GoldTable extends CometActor with CometListener {
       ".estEarningLoose *" #> difference.map(_.toString).getOrElse(" - ") &
       ".targetLoose *" #> gold.targetLoose &
       ".targetEarning *" #> gold.targetEarning &
+      ".isNotified *" #> gold.notifiedAt.get.map(formatNotifiedTime) &
       ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(gold.id.toString, _))
     }
   }
 
   override def lowPriority = {
-    case GoldTable.UpdateTable => reRender()
+    case UpdateTable => reRender(true)
   }
 
 }
-
