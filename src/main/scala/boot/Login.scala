@@ -72,7 +72,7 @@ object Login {
     authResult match {
       case Some(user) => 
         User.currentUser(Some(user))
-        S.redirectTo("/dashbaord")
+        S.redirectTo("/dashboard")
       case None => 
         User.currentUser(None)
         S.redirectTo("/", () => S.error("驗證碼錯誤，無法登入，請稍候再試"))

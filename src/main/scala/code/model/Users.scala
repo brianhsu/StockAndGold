@@ -9,7 +9,7 @@ import net.liftweb.http.SessionVar
 object User extends User with MongoMetaRecord[User] {
   
   object currentUser extends SessionVar[Option[User]](None)
-
+  def isLoggedIn = !currentUser.get.isEmpty
 }
 
 class User extends MongoRecord[User] with ObjectIdPk[User] {
