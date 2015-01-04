@@ -1500,16 +1500,15 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
 
   val stockCodeToName = stockTable.map(x => x.code -> x.name).toMap
  
-  def updateAllPrice(callback: => Any) = {
+  def updateAllPrice() = {
     val allStockIDs = StockInHand.useColl(_.distinct("stockID"))
     allStockIDs.foreach(stockID => updatePrice(stockID.toString))
-    callback
   }
 
   def updatePrice(stockCode: String) = {
 
     val infoURL = s"http://www.google.com/finance/info?infotype=infoquoteall&q=TPE:$stockCode"
-    val contentFuture = DataGetter(infoURL)
+    val htmlData = DataGetter(infoURL)
 
     def updatePriceInDB(responseContent: String) = Try {
       val JArray(List(jsonData)) = parse(responseContent.drop(3))
@@ -1533,7 +1532,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
            .saveTheRecord()
     }
 
-    contentFuture.foreach(updatePriceInDB)
+    htmlData.foreach(updatePriceInDB)
   }
 
 }

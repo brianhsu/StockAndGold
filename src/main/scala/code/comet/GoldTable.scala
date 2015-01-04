@@ -1,5 +1,6 @@
 package code.comet
 
+import code.lib._
 import code.lib.DateToCalendar._
 import code.model._
 import java.text.SimpleDateFormat
@@ -26,21 +27,30 @@ object GoldTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
 
-  def notifyBuy(newPrice: Gold) = Future {
+  def notifyBuy(newPrice: Gold) = {
+
     val userList = User.findAll("isBuyGoldNotified", false)
                        .filterNot(_.buyGoldAt.get.isEmpty)
                        .filter(newPrice.bankSellPrice.get <= _.buyGoldAt.get.get)
 
     userList.foreach { user =>
-      user.postPlurk(
+
+      val message = 
         s"黃金存摺銀賣買出 ${newPrice.bankSellPrice} / 每克，" +
         s"已達目標買價 ${user.buyGoldAt.get.get}"
-      )
-      user.isBuyGoldNotified(true).saveTheRecord()
+
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+        user.isBuyGoldNotified(true).saveTheRecord()
+      } else {
+        user.postPlurk(message).foreach { x =>
+          user.isBuyGoldNotified(true).saveTheRecord()
+        }
+      }
     }
   }
 
-  def notifySell(newPrice: Gold) = Future {
+  def notifySell(newPrice: Gold) = {
 
     def getDifference(goldInHand: GoldInHand) = {
       val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
@@ -71,33 +81,36 @@ object GoldTable extends LiftActor with ListenerManager {
         s"原價 $oldTotalPrice ，目前市值為 $newTotalPrice ，價差為 $difference，" +
         s"已達設定停損 / 停益點 ${goldInHand.targetLoose} / ${goldInHand.targetEarning}"
 
-      val newPlurk = user.postPlurk(message)
-
-      newPlurk match {
-        case Success(plurk) => 
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+        goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
+      } else {
+        user.postPlurk(message).foreach { _ =>
           goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-          updateListeners()
-        case _ =>
+        }
       }
+
+      updateListeners()
     }
   }
 
   def notifyTarget(): Unit = {
-    Gold.find("bankName", "TaiwanBank") match {
-      case Full(newPrice) =>
-        for {
-          _ <- notifyBuy(newPrice)
-          _ <- notifySell(newPrice)
-        } { 
-          Schedule(() => notifyTarget(), 1.minutes) 
-        }
-      case _ => Schedule(() => notifyTarget(), 1.minutes)
+
+    Future {
+      Gold.find("bankName", "TaiwanBank").foreach { newPrice =>
+        notifyBuy(newPrice)
+        notifySell(newPrice)
+      }
+    }.onComplete { _ => 
+      Schedule(() => notifyTarget(), 30.seconds) 
     }
   }
 
   def updateGoldPriceInDB(): Unit = {
-    Gold.updateNewPrice { newPrice =>
+    Future {
+      Gold.updateNewPrice()
       updateListeners()
+    }.onComplete { _ =>
       Schedule(() => updateGoldPriceInDB(), 3.minutes)
     }
   }
@@ -144,7 +157,6 @@ class GoldTable extends CometActor with CometListener {
 
   def render = {
 
-    println("Inside gold table render")
     val currentPrice = Gold.find("bankName", "TaiwanBank")
     def formatTimestamp(gold: Gold) = dateTimeFormatter.format(gold.priceUpdateAt.get.getTime)
 

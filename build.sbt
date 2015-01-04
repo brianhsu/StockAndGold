@@ -15,7 +15,9 @@ libraryDependencies ++= Seq(
   "org.eclipse.jetty" % "jetty-webapp" % "8.0.1.v20110908" % "container",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.3",
   "org.apache.httpcomponents" % "httpclient" % "4.3.6",
-  "org.bone" %% "soplurk" % "0.3.2"
+  "org.bone" %% "soplurk" % "0.3.2",
+  "org.igniterealtime.smack" % "smack-java7" % "4.0.1",
+  "com.plivo" % "plivo-java" % "3.0.1"
 )
 
 libraryDependencies ++= Seq(

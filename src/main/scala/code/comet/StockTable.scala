@@ -1,5 +1,6 @@
 package code.comet
 
+import code.lib._
 import code.model._
 import java.text.SimpleDateFormat
 import net.liftweb.actor._
@@ -27,11 +28,25 @@ object StockTable extends LiftActor with ListenerManager {
     case UpdateTable => updateListeners()
   }
 
+  def startNotification() {
+    Future {
+      notifyTarget()
+    }.onComplete { _ =>
+      Schedule(() => startNotification, 30.seconds)
+    }
+  }
+
   def notifyTarget() {
 
     def isReachedLimit(stockInHand: StockInHand): Boolean = {
-      val currentPrice = Stock.find("code", stockInHand.stockID.toString).map(_.currentPrice.get)
-      val totalPrice = (stockInHand.buyPrice.get * stockInHand.quantity.get + stockInHand.buyFee.get).toInt
+
+      val stockID = stockInHand.stockID.toString
+
+      val currentPrice = Stock.find("code", stockID).map(_.currentPrice.get)
+      val totalPrice = 
+        (stockInHand.buyPrice.get * stockInHand.quantity.get + 
+         stockInHand.buyFee.get).toInt
+
       val newTotalPrice = currentPrice.map(x => (stockInHand.quantity.get * x).toInt)
       val differenceBox = newTotalPrice.map(_ - totalPrice)
       val isReachedLimitBox = differenceBox.map { difference =>
@@ -45,48 +60,46 @@ object StockTable extends LiftActor with ListenerManager {
       isReachedLimitBox.openOr(false)
     }
 
-    val sendNotification = Future {
+    val notifiedList = StockInHand.findAll("isNotified", false).filter(isReachedLimit)
 
-      val notifiedList = StockInHand.findAll("isNotified", false).filter(isReachedLimit)
+    for {
+      stockInHand <- notifiedList
+      user        <- User.find(stockInHand.userID.get)
+      newPrice    <- Stock.find("code", stockInHand.stockID.toString)
+    } {
 
-      for {
-        stockInHand <- notifiedList
-        user        <- User.find(stockInHand.userID.get)
-        newPrice    <- Stock.find("code", stockInHand.stockID.toString)
-      } {
+      val oldTotalPrice = stockInHand.buyPrice.get * stockInHand.quantity.get + 
+                          stockInHand.buyFee.get
+      val newTotalPrice = newPrice.currentPrice.get * stockInHand.quantity.get
+      val difference = newTotalPrice - oldTotalPrice
+      val costFee = (newTotalPrice * 0.3 / 100) + (newTotalPrice * 0.145 / 100)
+      val stockName = Stock.stockCodeToName.get(stockInHand.stockID.toString)
+                           .getOrElse(stockInHand.stockID)
 
-        val oldTotalPrice = stockInHand.buyPrice.get * stockInHand.quantity.get + 
-                            stockInHand.buyFee.get
-        val newTotalPrice = newPrice.currentPrice.get * stockInHand.quantity.get
-        val difference = newTotalPrice - oldTotalPrice
-        val costFee = (newTotalPrice * 0.3 / 100) + (newTotalPrice * 0.145 / 100)
-        val stockName = Stock.stockCodeToName.get(stockInHand.stockID.toString)
-                             .getOrElse(stockInHand.stockID)
+      val message = 
+        s"成本為 ${oldTotalPrice} 的 $stockName 股票，" +
+        s"目前市值為 $newTotalPrice ，價差為 $difference，" +
+        s"已達設定停損 / 停益點 ${stockInHand.targetLoose} / ${stockInHand.targetEarning}。" +
+        s"預估賣出費用為 $costFee 元"
 
-        val message = 
-          s"成本為 ${oldTotalPrice} 的 $stockName 股票，" +
-          s"目前市值為 $newTotalPrice ，價差為 $difference，" +
-          s"已達設定停損 / 停益點 ${stockInHand.targetLoose} / ${stockInHand.targetEarning}。" +
-          s"預估賣出費用為 $costFee 元"
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+      }
 
-        val newPlurk = user.postPlurk(message)
+      val newPlurk = user.postPlurk(message)
 
-        newPlurk match {
-          case Success(plurk) => 
-            stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-            updateListeners()
-          case _ =>
-        }
-
+      newPlurk.foreach { plurk =>
+        stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
+        updateListeners()
       }
     }
-
-    sendNotification.onComplete(x => Schedule(() => notifyTarget(), 30.seconds))
   }
 
   def updateStockPriceInDB(): Unit = {
-    Stock.updateAllPrice {
+    Future {
+      Stock.updateAllPrice()
       updateListeners()
+    }.onComplete { _ =>
       Schedule(() => updateStockPriceInDB(), 30.seconds)
     }
   }

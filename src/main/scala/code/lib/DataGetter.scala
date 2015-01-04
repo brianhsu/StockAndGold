@@ -1,8 +1,6 @@
 package code.lib
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.util.Try
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.util.EntityUtils
 import org.apache.http.impl.client.HttpClientBuilder
@@ -10,7 +8,7 @@ import java.nio.charset.StandardCharsets
 
 object DataGetter {
 
-  def apply(url: String): Future[String] = Future {
+  def apply(url: String): Try[String] = Try {
 
     val httpClient = HttpClientBuilder.create.build
     val httpRequest = new HttpGet(url)
