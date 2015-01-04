@@ -1,5 +1,6 @@
 package code.comet
 
+import code.lib._
 import code.lib.DateToCalendar._
 import code.model._
 import java.text.SimpleDateFormat
@@ -32,10 +33,16 @@ object GoldTable extends LiftActor with ListenerManager {
                        .filter(newPrice.bankSellPrice.get <= _.buyGoldAt.get.get)
 
     userList.foreach { user =>
-      user.postPlurk(
+
+      val message = 
         s"黃金存摺銀賣買出 ${newPrice.bankSellPrice} / 每克，" +
         s"已達目標買價 ${user.buyGoldAt.get.get}"
-      )
+
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+      }
+
+      user.postPlurk(message)
       user.isBuyGoldNotified(true).saveTheRecord()
     }
   }
@@ -70,6 +77,11 @@ object GoldTable extends LiftActor with ListenerManager {
         s"買入價為 ${goldInHand.buyPrice} 的 ${goldInHand.quantity} 克黃金，" +
         s"原價 $oldTotalPrice ，目前市值為 $newTotalPrice ，價差為 $difference，" +
         s"已達設定停損 / 停益點 ${goldInHand.targetLoose} / ${goldInHand.targetEarning}"
+
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+      }
+
 
       val newPlurk = user.postPlurk(message)
 

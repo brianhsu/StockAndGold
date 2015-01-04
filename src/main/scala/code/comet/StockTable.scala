@@ -1,5 +1,6 @@
 package code.comet
 
+import code.lib._
 import code.model._
 import java.text.SimpleDateFormat
 import net.liftweb.actor._
@@ -68,6 +69,10 @@ object StockTable extends LiftActor with ListenerManager {
           s"目前市值為 $newTotalPrice ，價差為 $difference，" +
           s"已達設定停損 / 停益點 ${stockInHand.targetLoose} / ${stockInHand.targetEarning}。" +
           s"預估賣出費用為 $costFee 元"
+
+        if (user.nickname.get == "brianhsu") {
+          PrivateMessanger.sendMessage(user, message)
+        }
 
         val newPlurk = user.postPlurk(message)
 
