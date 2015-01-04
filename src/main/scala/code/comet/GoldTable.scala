@@ -27,7 +27,8 @@ object GoldTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
 
-  def notifyBuy(newPrice: Gold) = Future {
+  def notifyBuy(newPrice: Gold) = {
+
     val userList = User.findAll("isBuyGoldNotified", false)
                        .filterNot(_.buyGoldAt.get.isEmpty)
                        .filter(newPrice.bankSellPrice.get <= _.buyGoldAt.get.get)
@@ -47,7 +48,7 @@ object GoldTable extends LiftActor with ListenerManager {
     }
   }
 
-  def notifySell(newPrice: Gold) = Future {
+  def notifySell(newPrice: Gold) = {
 
     def getDifference(goldInHand: GoldInHand) = {
       val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
@@ -82,7 +83,6 @@ object GoldTable extends LiftActor with ListenerManager {
         PrivateMessanger.sendMessage(user, message)
       }
 
-
       val newPlurk = user.postPlurk(message)
 
       newPlurk match {
@@ -95,21 +95,21 @@ object GoldTable extends LiftActor with ListenerManager {
   }
 
   def notifyTarget(): Unit = {
-    Gold.find("bankName", "TaiwanBank") match {
-      case Full(newPrice) =>
-        for {
-          _ <- notifyBuy(newPrice)
-          _ <- notifySell(newPrice)
-        } { 
-          Schedule(() => notifyTarget(), 1.minutes) 
-        }
-      case _ => Schedule(() => notifyTarget(), 1.minutes)
+
+    Future {
+      Gold.find("bankName", "TaiwanBank").foreach { newPrice =>
+        notifyBuy(newPrice)
+        notifySell(newPrice)
+      }
+    }.onComplete { _ => 
+      Schedule(() => notifyTarget(), 1.minutes) 
     }
   }
 
   def updateGoldPriceInDB(): Unit = {
-    Gold.updateNewPrice { newPrice =>
-      updateListeners()
+    Future {
+      Gold.updateNewPrice()
+    }.onComplete { _ =>
       Schedule(() => updateGoldPriceInDB(), 3.minutes)
     }
   }

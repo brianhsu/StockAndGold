@@ -1,5 +1,6 @@
 package code.snippet
 
+import code.comet._
 import code.model._
 import code.lib.DateToCalendar._
 
@@ -57,7 +58,6 @@ class AddGoldForm {
                                .saveTheRecord()
       } yield newRecord
 
-      import code.comet._
       newRecord match {
         case Some(record) => 
           S.notice("成功新增持有黃金")
