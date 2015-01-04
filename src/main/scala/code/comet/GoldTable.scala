@@ -1,5 +1,6 @@
 package code.comet
 
+import code.lib.DateToCalendar._
 import code.model._
 import java.text.SimpleDateFormat
 import net.liftweb.actor._
@@ -9,6 +10,7 @@ import net.liftweb.http.CometListener
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.ListenerManager
+import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.util._
 import net.liftweb.util.Helpers._
@@ -17,7 +19,6 @@ import org.bone.soplurk.constant.Qualifier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util._
-import code.lib.DateToCalendar._
 
 case object UpdateTable
 
@@ -136,6 +137,8 @@ class GoldTable extends CometActor with CometListener {
       currentUser.buyGoldAt(buyTarget)
                  .isBuyGoldNotified(false)
                  .saveTheRecord()
+                 .foreach(s => S.notice(s"已設定新的黃金買入目票為 $value 元"))
+      this ! UpdateTable
     }
   }
 
