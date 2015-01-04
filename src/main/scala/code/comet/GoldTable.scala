@@ -41,10 +41,12 @@ object GoldTable extends LiftActor with ListenerManager {
 
       if (user.nickname.get == "brianhsu") {
         PrivateMessanger.sendMessage(user, message)
+        user.isBuyGoldNotified(true).saveTheRecord()
+      } else {
+        user.postPlurk(message).foreach { x =>
+          user.isBuyGoldNotified(true).saveTheRecord()
+        }
       }
-
-      user.postPlurk(message)
-      user.isBuyGoldNotified(true).saveTheRecord()
     }
   }
 
@@ -81,16 +83,14 @@ object GoldTable extends LiftActor with ListenerManager {
 
       if (user.nickname.get == "brianhsu") {
         PrivateMessanger.sendMessage(user, message)
-      }
-
-      val newPlurk = user.postPlurk(message)
-
-      newPlurk match {
-        case Success(plurk) => 
+        goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
+      } else {
+        user.postPlurk(message).foreach { _ =>
           goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-          updateListeners()
-        case _ =>
+        }
       }
+
+      updateListeners()
     }
   }
 
@@ -102,13 +102,14 @@ object GoldTable extends LiftActor with ListenerManager {
         notifySell(newPrice)
       }
     }.onComplete { _ => 
-      Schedule(() => notifyTarget(), 1.minutes) 
+      Schedule(() => notifyTarget(), 30.seconds) 
     }
   }
 
   def updateGoldPriceInDB(): Unit = {
     Future {
       Gold.updateNewPrice()
+      updateListeners()
     }.onComplete { _ =>
       Schedule(() => updateGoldPriceInDB(), 3.minutes)
     }
@@ -156,7 +157,6 @@ class GoldTable extends CometActor with CometListener {
 
   def render = {
 
-    println("Inside gold table render")
     val currentPrice = Gold.find("bankName", "TaiwanBank")
     def formatTimestamp(gold: Gold) = dateTimeFormatter.format(gold.priceUpdateAt.get.getTime)
 
