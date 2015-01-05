@@ -147,9 +147,9 @@ class GoldTable extends CometActor with CometListener {
                  .isBuyGoldNotified(false)
                  .saveTheRecord()
                  .foreach(s => S.notice(s"已設定新的黃金買入目票為 $value 元"))
-
-      this ! UpdateTable
     }
+
+    this ! UpdateTable
   }
 
   def render = {
