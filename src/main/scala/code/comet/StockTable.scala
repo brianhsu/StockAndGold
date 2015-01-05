@@ -138,7 +138,10 @@ class StockTable extends CometActor with CometListener{
       val newTotalPrice = currentPrice.map(x => (stock.quantity.get * x).toInt)
       val difference = newTotalPrice.map(_ - totalPrice)
       val sellCost = newTotalPrice.map { price =>
-        ((price * (0.1425 / 100)).round + (price * (0.3 / 100)).round) * -1
+        val originalFee = (price * (0.1425 / 100))
+        val fee = (originalFee * 0.28).max(20)
+        val tax = (price * (0.3 / 100)).round
+        (fee.round + tax) * -1
       }
       val priceUpdateAt = Stock.find("code", stock.stockID.toString).map(_.priceUpdateAt.get)
       def formatNotifiedTime(calendar: java.util.Calendar) = {
