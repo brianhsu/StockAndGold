@@ -132,10 +132,6 @@ class GoldTable extends CometActor with CometListener {
 
   private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd")
   private val dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm")
-  private def goldInHands = User.currentUser.map { user =>
-    GoldInHand.findAll("userID", user.id.get.toString)
-              .sortWith(_.buyDate.get.getTime.getTime < _.buyDate.get.getTime.getTime)
-  }
 
   def onDelete(rowID: String, value: String): JsCmd = {
     GoldInHand.delete("_id", rowID)
@@ -151,6 +147,7 @@ class GoldTable extends CometActor with CometListener {
                  .isBuyGoldNotified(false)
                  .saveTheRecord()
                  .foreach(s => S.notice(s"已設定新的黃金買入目票為 $value 元"))
+
       this ! UpdateTable
     }
   }
@@ -159,8 +156,11 @@ class GoldTable extends CometActor with CometListener {
 
     val currentPrice = Gold.find("bankName", "TaiwanBank")
     def formatTimestamp(gold: Gold) = dateTimeFormatter.format(gold.priceUpdateAt.get.getTime)
-
     val buyGoldTarget = User.currentUser.get.map(_.buyGoldAt.toString).getOrElse("")
+    val goldInHands = User.currentUser.map { user =>
+      GoldInHand.findAll("userID", user.id.get.toString)
+                .sortWith(_.buyDate.get.getTime.getTime < _.buyDate.get.getTime.getTime)
+    }
 
     "#buyTarget" #> SHtml.ajaxText(buyGoldTarget, false, setBuyGoldTarget _) &
     ".bankBuy *" #> currentPrice.map(_.bankBuyPrice.toString).getOrElse(" - ") &
@@ -177,6 +177,8 @@ class GoldTable extends CometActor with CometListener {
         <div>{dateTimeString}</div>
       }
 
+      val targetLooseUnitPrice = ((totalPrice - gold.targetLoose.get) / gold.quantity.get).abs
+      val targetEarningUnitPrice = (totalPrice + gold.targetEarning.get) / gold.quantity.get
 
       ".row [id]" #> s"gold-row-${gold.id}" &
       ".buyDate *" #> dateFormatter.format(gold.buyDate.get.getTime) &
@@ -184,9 +186,11 @@ class GoldTable extends CometActor with CometListener {
       ".unitPrice *" #> gold.buyPrice &
       ".totalPrice *" #> totalPrice &
       ".newTotalPrice *" #> newTotalPrice.map(_.toString).getOrElse(" - ") &
-      ".estEarningLoose *" #> difference.map(_.toString).getOrElse(" - ") &
+      ".estEarningLoose *" #> difference.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
       ".targetLoose *" #> gold.targetLoose &
       ".targetEarning *" #> gold.targetEarning &
+      ".targetLooseUnit *" #> s"$targetLooseUnitPrice / 克" &
+      ".targetEarningUnit *" #> s"$targetEarningUnitPrice / 克" &
       ".isNotified *" #> gold.notifiedAt.get.map(formatNotifiedTime) &
       ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(gold.id.toString, _))
     }

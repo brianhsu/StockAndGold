@@ -1,18 +1,20 @@
 package code.snippet
 
 import code.comet._
-import code.model._
 import code.lib.DateToCalendar._
+import code.model._
 
-import net.liftweb.util.Helpers._
-import net.liftweb.util._
+import java.text.SimpleDateFormat
+import net.liftweb.common._
+import net.liftweb.http.js.jquery.JqJsCmds._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
-import net.liftweb.http.SHtml
-import scala.util._
-import java.text.SimpleDateFormat
 import net.liftweb.http.S
-import net.liftweb.common._
+import net.liftweb.http.SHtml
+import net.liftweb.util._
+import net.liftweb.util.Helpers._
+import scala.util._
+import scala.xml.Text
 
 class AddGoldForm {
 
@@ -59,11 +61,8 @@ class AddGoldForm {
       } yield newRecord
 
       newRecord match {
-        case Some(record) => 
-          S.notice("成功新增持有黃金")
-          GoldTable ! UpdateTable
-        case _ => 
-          S.error("無法存檔，請稍候再試")
+        case Some(record) => S.notice("成功新增持有黃金")
+        case _ =>            S.error("無法存檔，請稍候再試")
       }
     }
 
@@ -79,14 +78,38 @@ class AddGoldForm {
       case Nil => saveToDB()
       case _   => errors.foreach(S.error)
     }
+    GoldTable ! UpdateTable
+  }
+
+  def updateUnitPrice: JsCmd = {
+    val updateLooseUnitPrice = for {
+      targetLooseValue <- targetLoose
+      quantityValue <- quantity
+      priceValue <- price
+    } yield {
+      val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
+      JqSetHtml("addStockTargetLooseUnit", Text(unitPrice.toString))
+    }
+
+    val updateEarningUnitPrice = for {
+      targetEarningValue <- targetEarning
+      quantityValue <- quantity
+      priceValue <- price
+    } yield {
+      val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
+      JqSetHtml("addStockTargetEarningUnit", Text(unitPrice.toString))
+    }
+
+    updateLooseUnitPrice.openOr(Noop) &
+    updateEarningUnitPrice.openOr(Noop)
   }
 
   def render = {
     "#addGoldDate [onchange]" #> SHtml.onEvent(dateString = _) &
-    "#quantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); Noop}) &
-    "#price" #> SHtml.ajaxText("", false, (x: String) => {price = asInt(x); Noop}) &
-    "#targetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); Noop}) &
-    "#targetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); Noop}) &
+    "#quantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
+    "#price" #> SHtml.ajaxText("", false, (x: String) => {price = asInt(x); updateUnitPrice}) &
+    "#targetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
+    "#targetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
     "#addGoldButton" #> SHtml.ajaxOnSubmit(addGold _)
   }
 }

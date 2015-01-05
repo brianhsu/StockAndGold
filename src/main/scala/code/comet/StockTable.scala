@@ -138,7 +138,7 @@ class StockTable extends CometActor with CometListener{
       val newTotalPrice = currentPrice.map(x => (stock.quantity.get * x).toInt)
       val difference = newTotalPrice.map(_ - totalPrice)
       val sellCost = newTotalPrice.map { price =>
-        ((price * (0.1425 / 100)).round + (price * (0.3 / 100)).round)
+        ((price * (0.1425 / 100)).round + (price * (0.3 / 100)).round) * -1
       }
       val priceUpdateAt = Stock.find("code", stock.stockID.toString).map(_.priceUpdateAt.get)
       def formatNotifiedTime(calendar: java.util.Calendar) = {
@@ -146,6 +146,9 @@ class StockTable extends CometActor with CometListener{
         <div>V</div>
         <div>{dateTimeString}</div>
       }
+
+      val targetLooseUnitPrice = ((totalPrice - stock.targetLoose.get) / stock.quantity.get).abs
+      val targetEarningUnitPrice = (totalPrice + stock.targetEarning.get) / stock.quantity.get
 
       ".row [id]" #> s"stock-row-${stock.id}" &
       ".stockName *" #> Stock.stockCodeToName.get(stock.stockID.toString).getOrElse("Unknown") &
@@ -156,9 +159,11 @@ class StockTable extends CometActor with CometListener{
       ".currentPrice *" #> currentPrice.map(_.toString).getOrElse("-") &
       ".newTotalPrice *" #> newTotalPrice.map(_.toString).getOrElse("-") &
       ".priceUpdateAt *" #> priceUpdateAt.map(x => dateTimeFormatter.format(x.getTime)).getOrElse("-") &
-      ".estEarningLoose *" #> difference.map(_.toString).getOrElse(" - ") &
-      ".sellCost *" #> sellCost.map(_.toString).getOrElse("-") &
+      ".estEarningLoose *" #> difference.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
+      ".sellCost *" #> sellCost.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
       ".targetLoose *" #> stock.targetLoose &
+      ".targetLooseUnit *" #> s"$targetLooseUnitPrice / 股" &
+      ".targetEarningUnit *" #> s"$targetEarningUnitPrice / 股" &
       ".targetEarning *" #> stock.targetEarning &
       ".isNotified *" #> stock.notifiedAt.get.map(formatNotifiedTime) &
       ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(stock.id.toString, _))

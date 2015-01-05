@@ -68,8 +68,14 @@
               <td class="ui center aligned totalPrice">3063</td>
               <td class="ui center aligned newTotalPrice">1234</td>
               <td class="ui center aligned estEarningLoose">-27</td>
-              <td class="ui center aligned targetLoose">1000</td>
-              <td class="ui center aligned targetEarning">1000</td>
+              <td class="ui center aligned">
+                <div class="targetLoose">1000</div>
+                <div class="targetLooseUnit">-</div>
+              </td>
+              <td class="ui center aligned">
+                <div class="targetEarning">1000</div>
+                <div class="targetEarningUnit">-</div>
+              </td>
               <td class="ui center aligned action">
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
@@ -84,8 +90,14 @@
               <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addGoldDate" size="10"/></td>
               <td class="ui center aligned"><input placeholder="買入數量" type="text" id="quantity" style="width: 4em" /></td>
               <td class="ui center aligned"><input placeholder="單價" type="text" id="price" style="width: 4em"/></td>
-              <td class="ui center aligned"><input placeholder="停損" type="text" id="targetLoose" style="width: 4em"/></td>
-              <td class="ui center aligned"><input placeholder="停益" type="text" id="targetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned">
+                <input placeholder="停損" type="text" id="targetLoose" style="width: 4em"/>
+                <div style="margin-top: 5px">單價：<span id="addGoldTargetLooseUnit"></span></div>
+              </td>
+              <td class="ui center aligned">
+                <input placeholder="停益" type="text" id="targetEarning" style="width: 4em"/>
+                <div style="margin-top: 5px">單價：<span id="addGoldTargetEarningUnit"></span></div>
+              </td>
               <td class="ui center aligned"><button type="submit" id="addGoldButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
                 $('#addGoldDate').datepicker({"dateFormat": "yy-mm-dd"});
@@ -135,8 +147,14 @@
                 <div class="estEarningLoose">1234</div>
                 <div class="sellCost"></div>
               </td>
-              <td class="ui center aligned targetLoose">1000</td>
-              <td class="ui center aligned targetEarning">1000</td>
+              <td class="ui center aligned">
+                <div class="targetLoose">1000</div>
+                <div class="targetLooseUnit">XX.XX</div>
+              </td>
+              <td class="ui center aligned">
+                <div class="targetEarning">1000</div>
+                <div class="targetEarningUnit">XX.XX</div>
+              </td>
               <td class="ui center aligned action">
                 <a><i class="ui delete circular link icon"></i></a>
               </td>
@@ -157,8 +175,14 @@
               <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="10"/></td>
               <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>
               <td class="ui center aligned"><input placeholder="手續費" type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
-              <td class="ui center aligned"><input placeholder="停損" type="text" id="addStockTargetLoose" style="width: 4em"/></td>
-              <td class="ui center aligned"><input placeholder="停益" type="text" id="addStockTargetEarning" style="width: 4em"/></td>
+              <td class="ui center aligned">
+                <input placeholder="停損" type="text" id="addStockTargetLoose" style="width: 4em"/>
+                <div style="margin-top: 5px">股價：<span id="addStockTargetLooseUnit"></span></div>
+              </td>
+              <td class="ui center aligned">
+                <input placeholder="停益" type="text" id="addStockTargetEarning" style="width: 4em"/>
+                <div style="margin-top: 5px">股價：<span id="addStockTargetEarningUnit"></span></div>
+              </td>
               <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
                 $("#addStockDate").datepicker({"dateFormat": "yy-mm-dd"});

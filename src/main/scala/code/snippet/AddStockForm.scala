@@ -1,16 +1,18 @@
 package code.snippet
 
+import code.lib.DateToCalendar._
 import code.model._
-import net.liftweb.util.Helpers._
-import net.liftweb.util._
+import java.text.SimpleDateFormat
+import net.liftweb.common._
+import net.liftweb.http.js.jquery.JqJsCmds._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
-import net.liftweb.http.SHtml
-import scala.util._
-import java.text.SimpleDateFormat
 import net.liftweb.http.S
-import net.liftweb.common._
-import code.lib.DateToCalendar._
+import net.liftweb.http.SHtml
+import net.liftweb.util._
+import net.liftweb.util.Helpers._
+import scala.util._
+import scala.xml.Text
 
 class AddStockForm {
 
@@ -95,6 +97,29 @@ class AddStockForm {
    
   }
 
+  def updateUnitPrice: JsCmd = {
+    val updateLooseUnitPrice = for {
+      targetLooseValue <- targetLoose
+      quantityValue <- quantity
+      priceValue <- price
+    } yield {
+      val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
+      JqSetHtml("addStockTargetLooseUnit", Text(unitPrice.toString))
+    }
+
+    val updateEarningUnitPrice = for {
+      targetEarningValue <- targetEarning
+      quantityValue <- quantity
+      priceValue <- price
+    } yield {
+      val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
+      JqSetHtml("addStockTargetEarningUnit", Text(unitPrice.toString))
+    }
+
+    updateLooseUnitPrice.openOr(Noop) &
+    updateEarningUnitPrice.openOr(Noop)
+  }
+
   def render = {
 
     ".stockListItem" #> Stock.stockTable.map { stockInfo =>
@@ -103,11 +128,11 @@ class AddStockForm {
     } &
     "#addStockCode [onchange]" #> SHtml.onEvent(stockCode = _) &
     "#addStockDate [onchange]" #> SHtml.onEvent(dateString = _) &
-    "#addStockQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); Noop}) &
-    "#addStockPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); Noop}) &
-    "#addStockFee" #> SHtml.ajaxText("", false, (x: String) => {buyFee = asInt(x); Noop}) &
-    "#addStockTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); Noop}) &
-    "#addStockTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); Noop}) &
+    "#addStockQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
+    "#addStockPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); updateUnitPrice}) &
+    "#addStockFee" #> SHtml.ajaxText("", false, (x: String) => {buyFee = asInt(x); updateUnitPrice}) &
+    "#addStockTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
+    "#addStockTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
     "#addStockButton" #> SHtml.ajaxOnSubmit(addStock _)
   }
 }
