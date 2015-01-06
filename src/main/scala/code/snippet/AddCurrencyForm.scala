@@ -14,18 +14,17 @@ import net.liftweb.util.Helpers._
 import scala.util._
 import scala.xml.Text
 
-class AddStockForm {
+class AddCurrencyForm {
 
   private var dateString: String = _
-  private var stockCode: String = _
+  private var currencyCode: String = _
   private var quantity: Box[Int] = Empty
   private var price: Box[Double] = Empty
-  private var buyFee: Box[Int] = Empty
   private var targetLoose: Box[Int] = Empty
   private var targetEarning: Box[Int] = Empty
   private val dateFormatter = new SimpleDateFormat("yyyy-MM-dd")
 
-  private val allStockCode = Stock.stockTable.map(_.code).toSet
+  private val allCurrencyCode = code.model.Currency.currencyList.map(_.code).toSet
 
   def checkDate(dateString: String): Option[String] = {
     Try(dateFormatter.parse(dateString)) match {
@@ -41,14 +40,14 @@ class AddStockForm {
     }
   }
 
-  def checkStockCode(stockCode: String) = {
-    allStockCode.contains(stockCode) match {
+  def checkCurrencyCode(currencyCode: String) = {
+    allCurrencyCode.contains(currencyCode) match {
       case true  => None
       case false => Some("無法找到這個股票，煩請檢查")
     }
   }
 
-  def addStock(): JsCmd = {
+  def addCurrency(): JsCmd = {
 
     def saveToDB(): JsCmd = {
       val newRecord = for {
@@ -58,11 +57,10 @@ class AddStockForm {
         price <- this.price
         targetEarning <- this.targetEarning
         targetLoose <- this.targetLoose
-        newRecord <- StockInHand.createRecord
+        newRecord <- CurrencyInHand.createRecord
                                .userID(currentUser.id.toString)
-                               .stockID(stockCode)
+                               .code(currencyCode)
                                .buyDate(date)
-                               .buyFee(buyFee)
                                .buyPrice(price)
                                .quantity(quantity)
                                .targetEarning(targetEarning)
@@ -71,18 +69,16 @@ class AddStockForm {
                                .saveTheRecord()
       } yield newRecord
 
-      import code.comet._
       newRecord match {
-        case Some(record) => 
-          S.notice("成功新增股票")
-          StockTable ! UpdateTable
-        case _ => 
-          S.error("無法存檔，請稍候再試")
+        case Some(record) => S.notice("成功新增外幣")
+        case _ => S.error("無法存檔，請稍候再試")
       }
+
+      //StockTable ! UpdateTable
     }
 
     val errors = List(
-      checkStockCode(stockCode),
+      checkCurrencyCode(currencyCode),
       checkDate(dateString),
       checkInt("持有單位", quantity),
       checkInt("成本單價", price),
@@ -104,7 +100,7 @@ class AddStockForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
-      JqSetHtml("addStockTargetLooseUnit", Text(unitPrice.toString))
+      JqSetHtml("addCurrencyTargetLooseUnit", Text(unitPrice.toString))
     }
 
     val updateEarningUnitPrice = for {
@@ -113,7 +109,7 @@ class AddStockForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
-      JqSetHtml("addStockTargetEarningUnit", Text(unitPrice.toString))
+      JqSetHtml("addCurrencyTargetEarningUnit", Text(unitPrice.toString))
     }
 
     updateLooseUnitPrice.openOr(Noop) &
@@ -122,17 +118,16 @@ class AddStockForm {
 
   def render = {
 
-    ".stockListItem" #> Stock.stockTable.map { stockInfo =>
-      ".stockListItem *" #> s"[${stockInfo.code}] ${stockInfo.name}" &
-      ".stockListItem [value]" #> stockInfo.code
+    ".currencyListItem" #> code.model.Currency.currencyList.map { currencyInfo =>
+      ".currencyListItem *" #> s"[${currencyInfo.code}] ${currencyInfo.name}" &
+      ".currencyListItem [value]" #> currencyInfo.code
     } &
-    "#addStockCode [onchange]" #> SHtml.onEvent(stockCode = _) &
-    "#addStockDate [onchange]" #> SHtml.onEvent(dateString = _) &
-    "#addStockQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
-    "#addStockPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); updateUnitPrice}) &
-    "#addStockFee" #> SHtml.ajaxText("", false, (x: String) => {buyFee = asInt(x); updateUnitPrice}) &
-    "#addStockTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
-    "#addStockTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
-    "#addStockButton" #> SHtml.ajaxOnSubmit(addStock _)
+    "#addCurrencyCode [onchange]" #> SHtml.onEvent(currencyCode = _) &
+    "#addCurrencyDate [onchange]" #> SHtml.onEvent(dateString = _) &
+    "#addCurrencyQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
+    "#addCurrencyPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); updateUnitPrice}) &
+    "#addCurrencyTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
+    "#addCurrencyTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
+    "#addCurrencyButton" #> SHtml.ajaxOnSubmit(addCurrency _)
   }
 }

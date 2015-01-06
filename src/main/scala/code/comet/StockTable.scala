@@ -84,14 +84,15 @@ object StockTable extends LiftActor with ListenerManager {
 
       if (user.nickname.get == "brianhsu") {
         PrivateMessanger.sendMessage(user, message)
-      }
+      } else {
 
-      val newPlurk = user.postPlurk(message)
+        val newPlurk = user.postPlurk(message)
 
-      newPlurk.foreach { plurk =>
-        stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-        updateListeners()
+        newPlurk.foreach { plurk =>
+          stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
+        }
       }
+      updateListeners()
     }
   }
 
@@ -106,7 +107,7 @@ object StockTable extends LiftActor with ListenerManager {
 
   def init() {
     updateStockPriceInDB()
-    notifyTarget()
+    startNotification()
   }
 
 }

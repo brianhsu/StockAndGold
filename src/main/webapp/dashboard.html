@@ -112,6 +112,87 @@
     </div>
 
     <div class="column">
+      <div>
+        <table class="ui celled structured table">
+          <thead>
+            <tr><th class="ui center aligned" colspan="12">台灣銀行外幣現金</th></tr>
+            <tr>
+              <th class="ui center aligned">已通知</th>
+              <th class="ui center aligned">幣別</th>
+              <th class="ui center aligned">日期</th>
+              <th class="ui center aligned">持有</th>
+              <th class="ui center aligned">買入匯率</th>
+              <th class="ui center aligned">成本</th>
+              <th class="ui center aligned">銀行買入匯率<br/>掛牌時間</th>
+              <th class="ui center aligned">現值</th>
+              <th class="ui center aligned">未實現損益</th>
+              <th class="ui center aligned">停損</th>
+              <th class="ui center aligned">停益</th>
+              <th class="ui center aligned">動作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="row">
+              <td class="ui center aligned isNotified"></td>
+              <td class="ui center aligned stockName">日元</td>
+              <td class="ui center aligned buyDate">2015-01-02</td>
+              <td class="ui center aligned quantity">10000</td>
+              <td class="ui center aligned unitPrice">0.27</td>
+              <td class="ui center aligned totalPrice">2700</td>
+              <td class="ui center aligned">
+                <div class="currentPrice">0.24</div>
+                <div class="priceUpdateAt" style="margin-top: 1em;">2014-11-02 22:11</div>
+              </td>
+              <td class="ui center aligned newTotalPrice"></td>
+              <td class="ui center aligned estEarningLoose"></td>
+              <td class="ui center aligned">
+                <div class="targetLoose">1000</div>
+                <div class="targetLooseUnit">XX.XX</div>
+              </td>
+              <td class="ui center aligned">
+                <div class="targetEarning">1000</div>
+                <div class="targetEarningUnit">XX.XX</div>
+              </td>
+              <td class="ui center aligned action">
+                <a><i class="ui delete circular link icon"></i></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <form data-lift="AddCurrencyForm?form=ajax">
+        <table class="ui celled structured table">
+          <tbody>
+            <tr>
+              <td class="ui center algined">
+                <select id="addCurrencyCode">
+                  <option value=""></option>
+                  <option class="currencyListItem" value=""></option>
+                </select>
+              </td>
+              <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addCurrencyDate" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="元" type="text" id="addCurrencyQuantity" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="單價" type="text" id="addCurrencyPrice" style="width: 4em"/></td>
+              <td class="ui center aligned">
+                <input placeholder="停損" type="text" id="addCurrencyTargetLoose" style="width: 4em"/>
+                <div style="margin-top: 5px">單價：<span id="addCurrencyTargetLooseUnit"></span></div>
+              </td>
+              <td class="ui center aligned">
+                <input placeholder="停益" type="text" id="addCurrencyTargetEarning" style="width: 4em"/>
+                <div style="margin-top: 5px">單價：<span id="addCurrencyTargetEarningUnit"></span></div>
+              </td>
+              <td class="ui center aligned"><button type="submit" id="addCurrencyButton" class="ui primary tiny button">新增</button></td>
+              <script type="text/javascript">
+                $("#addCurrencyDate").datepicker({"dateFormat": "yy-mm-dd"});
+                $("#addCurrencyCode").select2({width: "150px", allowCler: true, placeholder: "請選擇"});
+              </script>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+
+    </div>
+    <div class="column">
       <div data-lift="comet?type=StockTable">
         <table class="ui celled structured table">
           <thead>
@@ -170,8 +251,9 @@
               <td class="ui center algined">
                 <select id="addStockCode">
                   <option value=""></option>
-                  <option value="1234" class="stockListItem">黑松</option>
-               </select>
+                  <option class="stockListItem" value=""></option>
+                </select>
+              </td>
               <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addStockDate" size="10"/></td>
               <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="10"/></td>
               <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>

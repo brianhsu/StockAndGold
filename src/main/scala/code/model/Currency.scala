@@ -6,6 +6,7 @@ import net.liftweb.mongodb.record.MongoRecord
 import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.field._
+import net.liftweb.common._
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -13,6 +14,31 @@ import java.util.Calendar
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object Currency extends Currency with MongoMetaRecord[Currency] {
+
+  case class CurrencyInfo(code: String, name: String)
+
+  val currencyList = List(
+    CurrencyInfo("USD", "美金"),
+    CurrencyInfo("HKD", "港幣"),
+    CurrencyInfo("GBP", "英鎊"),
+    CurrencyInfo("AUD", "澳幣"),
+    CurrencyInfo("CAD", "加拿大幣"),
+    CurrencyInfo("SGD", "新加坡幣"),
+    CurrencyInfo("CHF", "瑞士法郎"),
+    CurrencyInfo("JPY", "日圓"),
+    CurrencyInfo("ZAR", "南非幣"),
+    CurrencyInfo("SEK", "瑞典幣"),
+    CurrencyInfo("NZD", "紐元"),
+    CurrencyInfo("THB", "泰幣"),
+    CurrencyInfo("PHP", "菲國比索"),
+    CurrencyInfo("IDR", "印尼幣"),
+    CurrencyInfo("EUR", "歐元"),
+    CurrencyInfo("KRW", "韓元"),
+    CurrencyInfo("VND", "越南盾"),
+    CurrencyInfo("MYR", "馬來幣"),
+    CurrencyInfo("CNY", "人民幣")
+  )
+
 
   def updateNewValue = {
 
@@ -35,10 +61,10 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
       targetLine.map(extractCsvURL)
     }
 
-    val rateHTMLFuture = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm")
+    val rateHTML = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm")
 
     for {
-      htmlData <- rateHTMLFuture
+      htmlData <- rateHTML
       csvURL <- getCsvURL(htmlData)
       csvData <- DataGetter(csvURL)
       lastUpdate = getLastUpdateTime(csvURL)
@@ -49,15 +75,32 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
       val bankBuy = BigDecimal(columns(3).trim)
       val bankSell = BigDecimal(columns(13).trim)
 
-      Currency.delete("code", currencyCode)
-      Currency.createRecord
-              .code(currencyCode)
-              .bankBuyPrice(bankBuy)
-              .bankSellPrice(bankSell)
-              .priceUpdateAt(lastUpdate)
-              .saveTheRecord()
+      val newRecord = Currency.find("code", currencyCode) match {
+        case Full(record) =>
 
+          Currency.createRecord
+                  .code(currencyCode)
+                  .bankBuyPrice(bankBuy)
+                  .bankSellPrice(bankSell)
+                  .priceUpdateAt(lastUpdate)
+                  .saveTheRecord()
+
+        case Empty =>
+          Currency.bankBuyPrice(bankBuy)
+                  .bankSellPrice(bankSell)
+                  .priceUpdateAt(lastUpdate)
+                  .saveTheRecord()
+
+        case e: Failure => e
+      }
+
+      newRecord match {
+        case Failure(msg, error, _) => error.foreach(_.printStackTrace())
+        case _ =>
+      }
     }
+
+    rateHTML.failed.foreach(_.printStackTrace)
   }
 }
 
