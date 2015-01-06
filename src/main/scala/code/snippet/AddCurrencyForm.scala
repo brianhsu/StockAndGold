@@ -19,7 +19,7 @@ class AddCurrencyForm {
 
   private var dateString: String = _
   private var currencyCode: String = _
-  private var quantity: Box[Int] = Empty
+  private var quantity: Box[Double] = Empty
   private var price: Box[Double] = Empty
   private var targetLoose: Box[Int] = Empty
   private var targetEarning: Box[Int] = Empty
@@ -125,7 +125,7 @@ class AddCurrencyForm {
     } &
     "#addCurrencyCode [onchange]" #> SHtml.onEvent(currencyCode = _) &
     "#addCurrencyDate [onchange]" #> SHtml.onEvent(dateString = _) &
-    "#addCurrencyQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
+    "#addCurrencyQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asDouble(x); updateUnitPrice}) &
     "#addCurrencyPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); updateUnitPrice}) &
     "#addCurrencyTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
     "#addCurrencyTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &

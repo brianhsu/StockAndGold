@@ -152,8 +152,8 @@ class CurrencyTable extends CometActor with CometListener{
       ".priceUpdateAt *" #> priceUpdateAt.map(x => dateTimeFormatter.format(x.getTime)).getOrElse("-") &
       ".estEarningLoose *" #> difference.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
       ".targetLoose *" #> currency.targetLoose &
-      ".targetLooseUnit *" #> s"$targetLooseUnitPrice" &
-      ".targetEarningUnit *" #> s"$targetEarningUnitPrice" &
+      ".targetLooseUnit *" #> f"$targetLooseUnitPrice%.3f" &
+      ".targetEarningUnit *" #> f"$targetEarningUnitPrice%.3f" &
       ".targetEarning *" #> currency.targetEarning &
       ".isNotified *" #> currency.notifiedAt.get.map(formatNotifiedTime) &
       ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(currency.id.toString, _))
