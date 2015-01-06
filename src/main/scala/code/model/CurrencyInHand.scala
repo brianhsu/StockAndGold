@@ -19,5 +19,7 @@ class CurrencyInHand extends MongoRecord[CurrencyInHand] with ObjectIdPk[Currenc
   val targetEarning = new IntField(this)
   val targetLoose = new IntField(this)
   val updateAt = new DateTimeField(this)
+  val isNotified = new BooleanField(this, false)
+  val notifiedAt = new OptionalDateTimeField(this)
 }
 

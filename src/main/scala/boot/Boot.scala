@@ -35,5 +35,6 @@ class Boot {
     LiftRules.setSiteMap(siteMap)
     GoldTable.init()
     StockTable.init()
+    CurrencyTable.init()
   }
 }

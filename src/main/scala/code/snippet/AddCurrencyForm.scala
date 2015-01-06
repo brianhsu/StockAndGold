@@ -1,5 +1,6 @@
 package code.snippet
 
+import code.comet._
 import code.lib.DateToCalendar._
 import code.model._
 import java.text.SimpleDateFormat
@@ -74,7 +75,7 @@ class AddCurrencyForm {
         case _ => S.error("無法存檔，請稍候再試")
       }
 
-      //StockTable ! UpdateTable
+      CurrencyTable ! UpdateTable
     }
 
     val errors = List(
@@ -100,7 +101,7 @@ class AddCurrencyForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
-      JqSetHtml("addCurrencyTargetLooseUnit", Text(unitPrice.toString))
+      JqSetHtml("addCurrencyTargetLooseUnit", Text(f"${unitPrice}%.3f"))
     }
 
     val updateEarningUnitPrice = for {
@@ -109,7 +110,7 @@ class AddCurrencyForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
-      JqSetHtml("addCurrencyTargetEarningUnit", Text(unitPrice.toString))
+      JqSetHtml("addCurrencyTargetEarningUnit", Text(f"${unitPrice}%.3f"))
     }
 
     updateLooseUnitPrice.openOr(Noop) &

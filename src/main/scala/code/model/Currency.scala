@@ -17,7 +17,8 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
 
   case class CurrencyInfo(code: String, name: String)
 
-  val currencyList = List(
+  lazy val currencyCodeToName = currencyList.map(x => (x.code, x.name)).toMap
+  lazy val currencyList = List(
     CurrencyInfo("USD", "美金"),
     CurrencyInfo("HKD", "港幣"),
     CurrencyInfo("GBP", "英鎊"),
@@ -40,7 +41,7 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
   )
 
 
-  def updateNewValue = {
+  def updateAllPrice() = {
 
     def getLastUpdateTime(csvURL: String): Calendar = {
       val dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
@@ -77,16 +78,15 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
 
       val newRecord = Currency.find("code", currencyCode) match {
         case Full(record) =>
-
-          Currency.createRecord
-                  .code(currencyCode)
-                  .bankBuyPrice(bankBuy)
+          Currency.bankBuyPrice(bankBuy)
                   .bankSellPrice(bankSell)
                   .priceUpdateAt(lastUpdate)
                   .saveTheRecord()
 
         case Empty =>
-          Currency.bankBuyPrice(bankBuy)
+          Currency.createRecord
+                  .code(currencyCode)
+                  .bankBuyPrice(bankBuy)
                   .bankSellPrice(bankSell)
                   .priceUpdateAt(lastUpdate)
                   .saveTheRecord()
