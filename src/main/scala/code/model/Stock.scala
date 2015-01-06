@@ -20,7 +20,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
 
   case class StockInfo(code: String, name: String, isTaiwan50: Boolean, isTaiwan100: Boolean)
 
-  val stockTable = List(
+  lazy val stockTable = List(
     StockInfo("0050", "台灣50", false, false),
     StockInfo("0051", "中100", false, false),
     StockInfo("0052", "FB科技", false, false),
@@ -1534,7 +1534,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
                 .priceUpdateAt(calendar)
                 .saveTheRecord()
 
-        case _ =>
+        case Empty =>
           Stock.createRecord
                .code(stockCode)
                .currentPrice(BigDecimal(currentPrice))
@@ -1543,6 +1543,8 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
                .closePrice(BigDecimal(closePrice))
                .priceUpdateAt(calendar)
                .saveTheRecord()
+
+        case e: Failure => e
       }
 
       newRecord match {

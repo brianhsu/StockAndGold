@@ -61,13 +61,15 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
               .priceUpdateAt(lastUpdateTime)
               .saveTheRecord()
 
-        case _ =>
+        case Empty =>
           Gold.createRecord
               .bankName("TaiwanBank")
               .bankSellPrice(bankSell)
               .bankBuyPrice(bankBuy)
               .priceUpdateAt(lastUpdateTime)
               .saveTheRecord()
+
+        case e: Failure => e
 
       }
 
