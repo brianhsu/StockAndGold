@@ -10,6 +10,7 @@ import net.liftweb.mongodb.record.field._
 import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.MongoRecord
 import net.liftweb.record.field._
+import net.liftweb.common._
 
 import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -1521,18 +1522,37 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
       val calendar = Calendar.getInstance
       calendar.setTime(dateFormatter.parse(dateString))
 
-      Stock.delete("code", stockCode)
-      Stock.createRecord
-           .code(stockCode)
-           .currentPrice(BigDecimal(currentPrice))
-           .minPrice(BigDecimal(minPrice))
-           .maxPrice(BigDecimal(maxPrice))
-           .closePrice(BigDecimal(closePrice))
-           .priceUpdateAt(calendar)
-           .saveTheRecord()
+      val newRecord = Stock.find("code", stockCode) match {
+
+        case Full(record) => 
+
+          record.code(stockCode)
+                .currentPrice(BigDecimal(currentPrice))
+                .minPrice(BigDecimal(minPrice))
+                .maxPrice(BigDecimal(maxPrice))
+                .closePrice(BigDecimal(closePrice))
+                .priceUpdateAt(calendar)
+                .saveTheRecord()
+
+        case _ =>
+          Stock.createRecord
+               .code(stockCode)
+               .currentPrice(BigDecimal(currentPrice))
+               .minPrice(BigDecimal(minPrice))
+               .maxPrice(BigDecimal(maxPrice))
+               .closePrice(BigDecimal(closePrice))
+               .priceUpdateAt(calendar)
+               .saveTheRecord()
+      }
+
+      newRecord match {
+        case Failure(msg, exception, _) => exception.foreach(_.printStackTrace)
+        case _ => 
+      }
     }
 
     htmlData.foreach(updatePriceInDB)
+    htmlData.failed.foreach(_.printStackTrace)
   }
 
 }

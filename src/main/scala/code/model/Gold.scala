@@ -4,6 +4,7 @@ import net.liftweb.mongodb.record.MongoRecord
 import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.field._
+import net.liftweb.common._
 
 import code.lib._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -41,25 +42,42 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
       }
     }
 
-    val htmlDataFuture = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP005.zh-TW.htm")
+    val htmlData = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP005.zh-TW.htm")
 
     for {
-      htmlData <- htmlDataFuture
-      lines = htmlData.split("\n")
+      content <- htmlData
+      lines = content.split("\n")
       goldSavingHTML <- getGoldSavingHTML(lines)
       lastUpdateTime <- getLastUpdateTime(lines)
     } {
+
       val List(bankSell, bankBuy) = goldSavingHTML.map(getPriceFromTR)
 
-      Gold.delete("bankName", "TaiwanBank")
-      Gold.createRecord
-          .bankName("TaiwanBank")
-          .bankSellPrice(bankSell)
-          .bankBuyPrice(bankBuy)
-          .priceUpdateAt(lastUpdateTime)
-          .saveTheRecord()
+      val newRecord = Gold.find("bankName", "TaiwanBank") match {
+
+        case Full(record) => 
+          Gold.bankSellPrice(bankSell)
+              .bankBuyPrice(bankBuy)
+              .priceUpdateAt(lastUpdateTime)
+              .saveTheRecord()
+
+        case _ =>
+          Gold.createRecord
+              .bankName("TaiwanBank")
+              .bankSellPrice(bankSell)
+              .bankBuyPrice(bankBuy)
+              .priceUpdateAt(lastUpdateTime)
+              .saveTheRecord()
+
+      }
+
+      newRecord match {
+        case Failure(msg, exception, _) => exception.foreach(_.printStackTrace)
+        case _ => 
+      }
     }
 
+    htmlData.failed.foreach(_.printStackTrace)
   }
 }
 
