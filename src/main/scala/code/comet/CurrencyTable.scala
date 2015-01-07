@@ -80,6 +80,8 @@ object CurrencyTable extends LiftActor with ListenerManager {
       } else {
 
         val newPlurk = user.postPlurk(message)
+        
+        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
 
         newPlurk.foreach { plurk =>
           currencyInHand.isNotified(true).notifiedAt(now).saveTheRecord()

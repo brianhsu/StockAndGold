@@ -22,7 +22,7 @@
     </div>
   </div>
       
-  <div style="padding-top:100px; padding-bottom:20px" class="ui one column page grid">
+  <div style="padding-top:90px; padding-bottom:20px" class="ui one column page grid">
     <div class="column">
       <div data-lift="lift:msgs?showAll=true">
         <lift:error_msg class="ui red sys message"></lift:error_msg>
@@ -31,6 +31,18 @@
       </div>
     </div>
     <div class="column">
+      <div class="ui form" style="float: right">
+        <div class="inline fields" data-lift="XMPPForm">
+          <div class="field">
+            <label>XMPP 通知：</label>
+            <input placeholder="使用者名稱" type="text" size="7" name="xmppUsername">
+          </div>@
+          <div class="field" style="margin-left: 10px">
+            <input placeholder="XMPP 伺服器" type="text" name="xmppServer">
+          </div>
+        </div>
+      </div>
+      <div style="clear: both" />
       <div data-lift="comet?type=GoldTable">
         <table class="ui celled structured table">
           <thead>

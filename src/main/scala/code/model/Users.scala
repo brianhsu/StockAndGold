@@ -26,6 +26,7 @@ class User extends MongoRecord[User] with ObjectIdPk[User] {
 
   val buyGoldAt = new OptionalIntField(this, None)
   val isBuyGoldNotified = new BooleanField(this, false)
+  val xmppAddress = new OptionalEmailField(this, 200)
 
   def postPlurk(message: String) = {
     val appKey = "oGjxYZZMHfPE"
