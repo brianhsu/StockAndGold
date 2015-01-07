@@ -11,14 +11,31 @@ import scala.util.Try
 import com.plivo.helper.api.client._
 import java.util.LinkedHashMap
 
+object XMPPMessanger {
+
+  private val xmppUsername = Props.get("XMPP_USERNAME").openOr("")
+  private val xmppPassword = Props.get("XMPP_PASSWORD").openOr("")
+ 
+  def send(xmppAddress: String, message: String) = Try {
+
+    val connection = new XMPPTCPConnection("xmpp.jp")
+    connection.connect()
+    connection.login(xmppUsername, xmppPassword)
+
+    ChatManager.getInstanceFor(connection)
+               .createChat(xmppAddress, null)
+               .sendMessage(message)
+
+    connection.disconnect()
+  }
+}
+
 object PrivateMessanger {
 
   private val appKey = Props.get("PLURK_APIKEY").openOr("")
   private val appSecret = Props.get("PLURK_APISECRET").openOr("")
   private val accessToken = Props.get("PLURK_ACCESS_TOKEN").openOr("")
   private val accessSecret = Props.get("PLURK_ACCESS_SECRET").openOr("")
-  private val xmppUsername = Props.get("XMPP_USERNAME").openOr("")
-  private val xmppPassword = Props.get("XMPP_PASSWORD").openOr("")
   private val smsAuthID = Props.get("SMS_AUTH_ID").openOr("")
   private val smsAuthToken = Props.get("SMS_AUTH_TOKEN").openOr("")
 
@@ -37,25 +54,12 @@ object PrivateMessanger {
     plurkAPI.Timeline.plurkAdd(message, Qualifier.Says, List(user.plurkUserID.get))
   }
 
-  def sendXMPPMessage(message: String) = Try {
-    val connection = new XMPPTCPConnection("xmpp.jp")
-    connection.connect()
-    connection.login(xmppUsername, xmppPassword)
-    ChatManager.getInstanceFor(connection)
-               .createChat("brianhsu@xmpp.jp", null)
-               .sendMessage(message)
-
-    ChatManager.getInstanceFor(connection)
-               .createChat("brianhsu.phone@xmpp.jp", null)
-               .sendMessage(message)
-
-    connection.disconnect()
-  }
 
   def sendMessage(user: User, message: String) {
     println("Send private message....")
     sendSMSMessage(message)
-    sendXMPPMessage(message)
+    XMPPMessanger.send("brianhsu@xmpp.jp", message)
+    XMPPMessanger.send("brianhsu.phone@xmpp.jp", message)
     sendPlurkMessage(user, message)
   }
 }

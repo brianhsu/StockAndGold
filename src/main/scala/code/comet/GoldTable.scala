@@ -85,6 +85,7 @@ object GoldTable extends LiftActor with ListenerManager {
         PrivateMessanger.sendMessage(user, message)
         goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
       } else {
+        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
         user.postPlurk(message).foreach { _ =>
           goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
         }

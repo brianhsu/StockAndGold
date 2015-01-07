@@ -85,9 +85,8 @@ object StockTable extends LiftActor with ListenerManager {
       if (user.nickname.get == "brianhsu") {
         PrivateMessanger.sendMessage(user, message)
       } else {
-
         val newPlurk = user.postPlurk(message)
-
+        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
         newPlurk.foreach { plurk =>
           stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
         }
