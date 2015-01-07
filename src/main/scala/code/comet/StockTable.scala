@@ -166,8 +166,8 @@ class StockTable extends CometActor with CometListener{
       ".estEarningLoose *" #> difference.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
       ".sellCost *" #> sellCost.map(x => PriceFormatter(x)).getOrElse(<span>-</span>) &
       ".targetLoose *" #> stock.targetLoose &
-      ".targetLooseUnit *" #> f"$targetLooseUnitPrice%.3f" &
-      ".targetEarningUnit *" #> f"$targetEarningUnitPrice%.3f" &
+      ".targetLooseUnit *" #> f"$targetLooseUnitPrice%.2f" &
+      ".targetEarningUnit *" #> f"$targetEarningUnitPrice%.2f" &
       ".targetEarning *" #> stock.targetEarning &
       ".isNotified *" #> stock.notifiedAt.get.map(formatNotifiedTime) &
       ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(stock.id.toString, _))
