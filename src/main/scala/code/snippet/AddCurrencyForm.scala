@@ -12,6 +12,7 @@ import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.util._
 import net.liftweb.util.Helpers._
+import net.liftweb.http.js.JE._
 import scala.util._
 import scala.xml.Text
 
@@ -101,7 +102,7 @@ class AddCurrencyForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
-      JqSetHtml("addCurrencyTargetLooseUnit", Text(f"${unitPrice}%.3f"))
+      JsRaw(f"$$('#addCurrencyTargetLooseUnit').val('${unitPrice}%.3f')").cmd
     }
 
     val updateEarningUnitPrice = for {
@@ -110,11 +111,38 @@ class AddCurrencyForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
-      JqSetHtml("addCurrencyTargetEarningUnit", Text(f"${unitPrice}%.3f"))
+      JsRaw(f"$$('#addCurrencyTargetEarningUnit').val('${unitPrice}%.3f')").cmd
     }
 
     updateLooseUnitPrice.openOr(Noop) &
     updateEarningUnitPrice.openOr(Noop)
+  }
+
+  def setEarningUnitPrice(value: String): JsCmd = {
+    val jsCmd = for {
+      quantity <- this.quantity
+      earningUnitPrice <- asDouble(value)
+      unitPrice <- this.price
+    } yield {
+      val totalPrice = (earningUnitPrice * quantity - unitPrice * quantity).toInt
+      targetEarning = Full(totalPrice)
+      JsRaw(s"$$('#addCurrencyTargetEarning').val('$totalPrice')").cmd
+    }
+    jsCmd.openOr(Noop)
+  }
+
+
+  def setLooseUnitPrice(value: String): JsCmd = {
+    val jsCmd = for {
+      quantity <- this.quantity
+      loseUnitPrice <- asDouble(value)
+      unitPrice <- this.price
+    } yield {
+      val totalPrice = ((unitPrice * quantity) - (loseUnitPrice * quantity)).toInt
+      targetLoose = Full(totalPrice)
+      JsRaw(s"$$('#addCurrencyTargetLoose').val('$totalPrice')").cmd
+    }
+    jsCmd.openOr(Noop)
   }
 
   def render = {
@@ -128,7 +156,9 @@ class AddCurrencyForm {
     "#addCurrencyQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asDouble(x); updateUnitPrice}) &
     "#addCurrencyPrice" #> SHtml.ajaxText("", false, (x: String) => {price = asDouble(x); updateUnitPrice}) &
     "#addCurrencyTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
-    "#addCurrencyTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
+    "#addCurrencyTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) & 
+    "#addCurrencyTargetLooseUnit" #> SHtml.ajaxText("", false, setLooseUnitPrice _) &
+    "#addCurrencyTargetEarningUnit" #> SHtml.ajaxText("", false, setEarningUnitPrice _) &
     "#addCurrencyButton" #> SHtml.ajaxOnSubmit(addCurrency _)
   }
 }

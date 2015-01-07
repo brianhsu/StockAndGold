@@ -119,11 +119,9 @@
           </tbody>
         </table>
       </form>
-
-      </form>
     </div>
 
-    <div class="column">
+    <div class="column" style="margin-top: 2em;">
       <div data-lift="comet?type=CurrencyTable">
         <table class="ui celled structured table">
           <thead>
@@ -186,12 +184,12 @@
               <td class="ui center aligned"><input placeholder="元" type="text" id="addCurrencyQuantity" size="10"/></td>
               <td class="ui center aligned"><input placeholder="單價" type="text" id="addCurrencyPrice" style="width: 4em"/></td>
               <td class="ui center aligned">
-                <input placeholder="停損" type="text" id="addCurrencyTargetLoose" style="width: 4em"/>
-                <div style="margin-top: 5px">單價：<span id="addCurrencyTargetLooseUnit"></span></div>
+                <input placeholder="停損金額" type="text" id="addCurrencyTargetLoose" style="width: 5em"/>
+                <input placeholder="停損匯率" type="text" id="addCurrencyTargetLooseUnit" style="width: 5em"/>
               </td>
               <td class="ui center aligned">
-                <input placeholder="停益" type="text" id="addCurrencyTargetEarning" style="width: 4em"/>
-                <div style="margin-top: 5px">單價：<span id="addCurrencyTargetEarningUnit"></span></div>
+                <input placeholder="停益金額" type="text" id="addCurrencyTargetEarning" style="width: 5em"/>
+                <input placeholder="停益匯率" type="text" id="addCurrencyTargetEarningUnit" style="width: 5em"/>
               </td>
               <td class="ui center aligned"><button type="submit" id="addCurrencyButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
@@ -202,9 +200,9 @@
           </tbody>
         </table>
       </form>
-
     </div>
-    <div class="column">
+
+    <div class="column" style="margin-top: 2em;">
       <div data-lift="comet?type=StockTable">
         <table class="ui celled structured table">
           <thead>
@@ -267,16 +265,20 @@
                 </select>
               </td>
               <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addStockDate" size="10"/></td>
-              <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="10"/></td>
+              <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="5"/></td>
               <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>
               <td class="ui center aligned"><input placeholder="手續費" type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
               <td class="ui center aligned">
-                <input placeholder="停損" type="text" id="addStockTargetLoose" style="width: 4em"/>
-                <div style="margin-top: 5px">股價：<span id="addStockTargetLooseUnit"></span></div>
+                <input placeholder="停損金額" type="text" id="addStockTargetLoose" style="width: 5em"/>
+                <div style="margin-top: 5px">
+                  <input placeholder="停損股價" id="addStockTargetLooseUnit" style="width: 5em"></input>
+                </div>
               </td>
               <td class="ui center aligned">
-                <input placeholder="停益" type="text" id="addStockTargetEarning" style="width: 4em"/>
-                <div style="margin-top: 5px">股價：<span id="addStockTargetEarningUnit"></span></div>
+                <input placeholder="停益金額" type="text" id="addStockTargetEarning" style="width: 5em;"/>
+                <div style="margin-top: 5px">
+                  <input placeholder="停益股價" id="addStockTargetEarningUnit" style="width: 5em;"></input>
+                </div>
               </td>
               <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
               <script type="text/javascript">
@@ -288,7 +290,6 @@
         </table>
       </form>
       <div class="ui segment">預估交易費用為手續費（成交金額 * 0.1425% * 0.28，最低 20 元）加證交稅（成交金額 * 0.3%）</div>
-
     </div>
   </div>
 
