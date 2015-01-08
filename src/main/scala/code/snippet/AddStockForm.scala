@@ -101,19 +101,21 @@ class AddStockForm {
   def updateUnitPrice: JsCmd = {
     val updateLooseUnitPrice = for {
       targetLooseValue <- targetLoose
+      buyFee <- this.buyFee
       quantityValue <- quantity
       priceValue <- price
     } yield {
-      val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
+      val unitPrice = (quantityValue * priceValue - buyFee - targetLooseValue) / quantityValue
       JsRaw(s"""$$('#addStockTargetLooseUnit').val('${unitPrice.toString}')""").cmd
     }
 
     val updateEarningUnitPrice = for {
       targetEarningValue <- targetEarning
       quantityValue <- quantity
+      buyFee <- this.buyFee
       priceValue <- price
     } yield {
-      val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
+      val unitPrice = (quantityValue * priceValue - buyFee + targetEarningValue) / quantityValue
       JsRaw(s"""$$('#addStockTargetEarningUnit').val('${unitPrice.toString}')""").cmd
     }
 
@@ -125,9 +127,10 @@ class AddStockForm {
     val jsCmd = for {
       quantity <- this.quantity
       earningUnitPrice <- asDouble(value)
+      buyFee <- this.buyFee
       unitPrice <- this.price
     } yield {
-      val totalPrice = (earningUnitPrice * quantity - unitPrice * quantity).toInt
+      val totalPrice = (earningUnitPrice * quantity - unitPrice * quantity + buyFee).toInt
       targetEarning = Full(totalPrice)
       JsRaw(s"$$('#addStockTargetEarning').val('$totalPrice')").cmd
     }
@@ -139,12 +142,14 @@ class AddStockForm {
     val jsCmd = for {
       quantity <- this.quantity
       loseUnitPrice <- asDouble(value)
+      buyFee <- this.buyFee
       unitPrice <- this.price
     } yield {
-      val totalPrice = ((unitPrice * quantity) - (loseUnitPrice * quantity)).toInt
+      val totalPrice = ((unitPrice * quantity) - (loseUnitPrice * quantity) + buyFee).toInt
       targetLoose = Full(totalPrice)
       JsRaw(s"$$('#addStockTargetLoose').val('$totalPrice')").cmd
     }
+
     jsCmd.openOr(Noop)
   }
 

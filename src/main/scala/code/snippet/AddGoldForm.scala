@@ -9,6 +9,7 @@ import net.liftweb.common._
 import net.liftweb.http.js.jquery.JqJsCmds._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js.JE._
 import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.util._
@@ -88,7 +89,7 @@ class AddGoldForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue - targetLooseValue) / quantityValue
-      JqSetHtml("addStockTargetLooseUnit", Text(unitPrice.toString))
+      JsRaw(s"""$$('#addGoldTargetLooseUnit').val('${unitPrice.toString}')""").cmd
     }
 
     val updateEarningUnitPrice = for {
@@ -97,19 +98,50 @@ class AddGoldForm {
       priceValue <- price
     } yield {
       val unitPrice = (quantityValue * priceValue + targetEarningValue) / quantityValue
-      JqSetHtml("addStockTargetEarningUnit", Text(unitPrice.toString))
+      JsRaw(s"""$$('#addGoldTargetEarningUnit').val('${unitPrice.toString}')""").cmd
     }
 
     updateLooseUnitPrice.openOr(Noop) &
     updateEarningUnitPrice.openOr(Noop)
   }
 
+  def setEarningUnitPrice(value: String): JsCmd = {
+    val jsCmd = for {
+      quantity <- this.quantity
+      earningUnitPrice <- asDouble(value)
+      unitPrice <- this.price
+    } yield {
+      val totalPrice = (earningUnitPrice * quantity - unitPrice * quantity).toInt
+      targetEarning = Full(totalPrice)
+      JsRaw(s"$$('#addGoldTargetEarning').val('$totalPrice')").cmd
+    }
+    jsCmd.openOr(Noop)
+  }
+
+
+  def setLooseUnitPrice(value: String): JsCmd = {
+    val jsCmd = for {
+      quantity <- this.quantity
+      loseUnitPrice <- asDouble(value)
+      unitPrice <- this.price
+    } yield {
+      val totalPrice = ((unitPrice * quantity) - (loseUnitPrice * quantity)).toInt
+      targetLoose = Full(totalPrice)
+      JsRaw(s"$$('#addGoldTargetLoose').val('$totalPrice')").cmd
+    }
+    jsCmd.openOr(Noop)
+  }
+
+
+
   def render = {
     "#addGoldDate [onchange]" #> SHtml.onEvent(dateString = _) &
     "#quantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &
     "#price" #> SHtml.ajaxText("", false, (x: String) => {price = asInt(x); updateUnitPrice}) &
-    "#targetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
-    "#targetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
+    "#addGoldTargetLoose" #> SHtml.ajaxText("", false, (x: String) => {targetLoose = asInt(x); updateUnitPrice}) &
+    "#addGoldTargetEarning" #> SHtml.ajaxText("", false, (x: String) => {targetEarning = asInt(x); updateUnitPrice}) &
+    "#addGoldTargetLooseUnit" #> SHtml.ajaxText("", false, setLooseUnitPrice _) &
+    "#addGoldTargetEarningUnit" #> SHtml.ajaxText("", false, setEarningUnitPrice _) &
     "#addGoldButton" #> SHtml.ajaxOnSubmit(addGold _)
   }
 }
