@@ -21,28 +21,22 @@ class XMPPForm {
   private var xmppServer: String = _
 
   private def saveToDatabase() = {
-    //println("user:" + User.currentUser.get)
-    println("username:" + Option(xmppUsername))
-    println("server:" + Option(xmppServer))
     for {
       user     <- User.currentUser.get
       username <- Option(xmppUsername)
       server   <- Option(xmppServer)
-      //xmppAddress <- user.xmppAddress(s"${username}@${server}").saveTheRecord()
+      xmppAddress <- user.xmppAddress(s"${username}@${server}").saveTheRecord()
     } {
-      println("QQQQQQQQQQQ")
-      //S.notice(s"已將 XMPP 通知設定至 $xmppAddress")
+      S.notice(s"已將 XMPP 通知設定至 $username@$server")
     }
     Noop
   }
 
   private def setupXMPPUsername(username: String) = {
-    println("inside setupXMPPUsername:" + username)
     xmppUsername = username
     saveToDatabase()
   }
   private def setupXMPPServer(server: String) = {
-    println("inside setupXMPPServer:" + server)
     xmppServer = server
     saveToDatabase()
   }
