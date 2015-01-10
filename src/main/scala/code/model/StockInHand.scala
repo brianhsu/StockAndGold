@@ -5,6 +5,18 @@ import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.field._
 
+object StockToBuy extends StockToBuy with MongoMetaRecord[StockToBuy]
+
+class StockToBuy extends MongoRecord[StockToBuy] with ObjectIdPk[StockToBuy] {
+  def meta = StockToBuy
+
+  val userID = new StringField(this, 24)
+  val stockID = new StringField(this, 20)
+  val unitPrice = new DecimalField(this, 2)
+  val isNotified = new BooleanField(this, false)
+  val notifiedAt = new OptionalDateTimeField(this, None)
+  val updateAt = new DateTimeField(this)
+}
 
 object StockInHand extends StockInHand with MongoMetaRecord[StockInHand]
 

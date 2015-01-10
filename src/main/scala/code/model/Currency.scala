@@ -78,10 +78,10 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
 
       val newRecord = Currency.find("code", currencyCode) match {
         case Full(record) =>
-          Currency.bankBuyPrice(bankBuy)
-                  .bankSellPrice(bankSell)
-                  .priceUpdateAt(lastUpdate)
-                  .saveTheRecord()
+          record.bankBuyPrice(bankBuy)
+                .bankSellPrice(bankSell)
+                .priceUpdateAt(lastUpdate)
+                .saveTheRecord()
 
         case Empty =>
           Currency.createRecord

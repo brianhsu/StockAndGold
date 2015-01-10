@@ -1502,7 +1502,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
   val stockCodeToName = stockTable.map(x => x.code -> x.name).toMap
  
   def updateAllPrice() = {
-    val allStockIDs = StockInHand.useColl(_.distinct("stockID"))
+    val allStockIDs = StockInHand.useColl(_.distinct("stockID")) ++ StockToBuy.useColl(_.distinct("stockID"))
     allStockIDs.foreach(stockID => updatePrice(stockID.toString))
   }
 

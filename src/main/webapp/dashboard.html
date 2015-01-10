@@ -8,10 +8,14 @@
   <link href="/static/SemanticUI/custom.css" type="text/css" rel="stylesheet"/>
   <link href="/static/jquery-ui-1.11.2/jquery-ui.min.css" type="text/css" rel="stylesheet">
   <link href="/static/select2-3.5.2/select2.css" type="text/css" rel="stylesheet">
+
   <script src="/static/jquery-ui-1.11.2/jquery-1.11.2.min.js"></script>
   <script src="/static/jquery-ui-1.11.2/jquery-ui.min.js"></script>
   <script src="/static/jquery-ui-1.11.2/datepicker-zh-TW.js"></script>
   <script src="/static/select2-3.5.2/select2.js"></script>
+
+  <script src="/static/SemanticUI/semantic.min.js"></script>
+
   <title>證券理財小幫手</title>
 </head>
 <body>
@@ -35,7 +39,7 @@
         <div class="inline fields" data-lift="XMPPForm">
           <div class="field">
             <label>XMPP 通知：</label>
-            <input placeholder="使用者名稱" type="text" size="7" name="xmppUsername">
+            <input placeholder="使用者名稱" type="text" size="7" name="xmppUsername" style="width: 7em;">
           </div>@
           <div class="field" style="margin-left: 10px">
             <input placeholder="XMPP 伺服器" type="text" name="xmppServer">
@@ -202,96 +206,153 @@
       </form>
     </div>
 
+
     <div class="column" style="margin-top: 2em;">
-      <div data-lift="comet?type=StockTable">
-        <table class="ui celled structured table">
-          <thead>
-            <tr><th class="ui center aligned" colspan="12">股票</th></tr>
-            <tr>
-              <th class="ui center aligned">已通知</th>
-              <th class="ui center aligned">股票</th>
-              <th class="ui center aligned">日期</th>
-              <th class="ui center aligned">持有股數</th>
-              <th class="ui center aligned">成本單價</th>
-              <th class="ui center aligned">成本總計</th>
-              <th class="ui center aligned">成交價<br/>掛牌時間</th>
-              <th class="ui center aligned">現值</th>
-              <th class="ui center aligned">未實現損益<br/>預估交易成本</th>
-              <th class="ui center aligned">停損</th>
-              <th class="ui center aligned">停益</th>
-              <th class="ui center aligned">動作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="row">
-              <td class="ui center aligned isNotified"></td>
-              <td class="ui center aligned stockName">高股息</td>
-              <td class="ui center aligned buyDate">2015-01-02</td>
-              <td class="ui center aligned quantity">3</td>
-              <td class="ui center aligned unitPrice">1021</td>
-              <td class="ui center aligned totalPrice">3063</td>
-              <td class="ui center aligned">
-                <div class="currentPrice">12.2</div>
-                <div class="priceUpdateAt" style="margin-top: 1em;">2014-11-02 22:11</div>
-              </td>
-              <td class="ui center aligned newTotalPrice"></td>
-              <td class="ui center aligned">
-                <div class="estEarningLoose">1234</div>
-                <div class="sellCost"></div>
-              </td>
-              <td class="ui center aligned">
-                <div class="targetLoose">1000</div>
-                <div class="targetLooseUnit">XX.XX</div>
-              </td>
-              <td class="ui center aligned">
-                <div class="targetEarning">1000</div>
-                <div class="targetEarningUnit">XX.XX</div>
-              </td>
-              <td class="ui center aligned action">
-                <a><i class="ui delete circular link icon"></i></a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="ui top attached tabular menu">
+        <div class="active item" data-tab="SellStock">股票賣出通知</div>
+        <div class="item" data-tab="BuyStock">股票買入通知</div>
       </div>
-      <form data-lift="AddStockForm?form=ajax">
-        <table class="ui celled structured table">
-          <tbody>
-            <tr>
-              <td class="ui center algined">
-                <select id="addStockCode">
-                  <option value=""></option>
-                  <option class="stockListItem" value=""></option>
-                </select>
-              </td>
-              <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addStockDate" size="10"/></td>
-              <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="5"/></td>
-              <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>
-              <td class="ui center aligned"><input placeholder="手續費" type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
-              <td class="ui center aligned">
-                <input placeholder="停損金額" type="text" id="addStockTargetLoose" style="width: 5em"/>
-                <div style="margin-top: 5px">
-                  <input placeholder="停損股價" id="addStockTargetLooseUnit" style="width: 5em"></input>
-                </div>
-              </td>
-              <td class="ui center aligned">
-                <input placeholder="停益金額" type="text" id="addStockTargetEarning" style="width: 5em;"/>
-                <div style="margin-top: 5px">
-                  <input placeholder="停益股價" id="addStockTargetEarningUnit" style="width: 5em;"></input>
-                </div>
-              </td>
-              <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
-              <script type="text/javascript">
-                $("#addStockDate").datepicker({"dateFormat": "yy-mm-dd"});
-                $("#addStockCode").select2({width: "100px", allowCler: true, placeholder: "請選擇"});
-              </script>
-            </tr>
-          </tbody>
-        </table>
-      </form>
-      <div class="ui segment">預估交易費用為手續費（成交金額 * 0.1425% * 0.28，最低 20 元）加證交稅（成交金額 * 0.3%）</div>
+      <div class="ui bottom attached active tab segment" data-tab="SellStock">
+        <div data-lift="comet?type=StockTable">
+          <table class="ui celled structured table">
+            <thead>
+              <tr><th class="ui center aligned" colspan="12">股票</th></tr>
+              <tr>
+                <th class="ui center aligned">已通知</th>
+                <th class="ui center aligned">股票</th>
+                <th class="ui center aligned">日期</th>
+                <th class="ui center aligned">持有股數</th>
+                <th class="ui center aligned">成本單價</th>
+                <th class="ui center aligned">成本總計</th>
+                <th class="ui center aligned">成交價<br/>掛牌時間</th>
+                <th class="ui center aligned">現值</th>
+                <th class="ui center aligned">未實現損益<br/>預估交易成本</th>
+                <th class="ui center aligned">停損</th>
+                <th class="ui center aligned">停益</th>
+                <th class="ui center aligned">動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row">
+                <td class="ui center aligned isNotified"></td>
+                <td class="ui center aligned stockName">高股息</td>
+                <td class="ui center aligned buyDate">2015-01-02</td>
+                <td class="ui center aligned quantity">3</td>
+                <td class="ui center aligned unitPrice">1021</td>
+                <td class="ui center aligned totalPrice">3063</td>
+                <td class="ui center aligned">
+                  <div class="currentPrice">12.2</div>
+                  <div class="priceUpdateAt" style="margin-top: 1em;">2014-11-02 22:11</div>
+                </td>
+                <td class="ui center aligned newTotalPrice"></td>
+                <td class="ui center aligned">
+                  <div class="estEarningLoose">1234</div>
+                  <div class="sellCost"></div>
+                </td>
+                <td class="ui center aligned">
+                  <div class="targetLoose">1000</div>
+                  <div class="targetLooseUnit">XX.XX</div>
+                </td>
+                <td class="ui center aligned">
+                  <div class="targetEarning">1000</div>
+                  <div class="targetEarningUnit">XX.XX</div>
+                </td>
+                <td class="ui center aligned action">
+                  <a><i class="ui delete circular link icon"></i></a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <form data-lift="AddStockForm?form=ajax">
+          <table class="ui celled structured table">
+            <tbody>
+              <tr>
+                <td class="ui center algined">
+                  <select id="addStockCode" data-lift="StockList">
+                    <option value=""></option>
+                    <option class="stockListItem" value=""></option>
+                  </select>
+                </td>
+                <td class="ui center aligned"><input placeholder="買入日期" type="text" id="addStockDate" size="10"/></td>
+                <td class="ui center aligned"><input placeholder="股數" type="text" id="addStockQuantity" size="5"/></td>
+                <td class="ui center aligned"><input placeholder="成交價" type="text" id="addStockPrice" style="width: 4em"/></td>
+                <td class="ui center aligned"><input placeholder="手續費" type="text" id="addStockFee" style="width: 4em" placeholder="手續費"/></td>
+                <td class="ui center aligned">
+                  <input placeholder="停損金額" type="text" id="addStockTargetLoose" style="width: 5em"/>
+                  <div style="margin-top: 5px">
+                    <input placeholder="停損股價" id="addStockTargetLooseUnit" style="width: 5em"></input>
+                  </div>
+                </td>
+                <td class="ui center aligned">
+                  <input placeholder="停益金額" type="text" id="addStockTargetEarning" style="width: 5em;"/>
+                  <div style="margin-top: 5px">
+                    <input placeholder="停益股價" id="addStockTargetEarningUnit" style="width: 5em;"></input>
+                  </div>
+                </td>
+                <td class="ui center aligned"><button type="submit" id="addStockButton" class="ui primary tiny button">新增</button></td>
+                <script type="text/javascript">
+                  $("#addStockDate").datepicker({"dateFormat": "yy-mm-dd"});
+                  $("#addStockCode").select2({width: "100px", allowCler: true, placeholder: "請選擇"});
+                </script>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+        <div class="ui segment">預估交易費用為手續費（成交金額 * 0.1425% * 0.28，最低 20 元）加證交稅（成交金額 * 0.3%）</div>
+      </div>
+      <div class="ui bottom attached tab segment" data-tab="BuyStock">
+        <div data-lift="comet?type=StockBuyTable">
+          <table class="ui celled structured table">
+            <thead>
+              <tr><th class="ui center aligned" colspan="12">股票</th></tr>
+              <tr>
+                <th class="ui center aligned">已通知</th>
+                <th class="ui center aligned">股票</th>
+                <th class="ui center aligned">目標股價</th>
+                <th class="ui center aligned">成交價</th>
+                <th class="ui center aligned">掛牌時間</th>
+                <th class="ui center aligned">動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="row">
+                <td class="ui center aligned isNotified"></td>
+                <td class="ui center aligned stockName">高股息</td>
+                <td class="ui center aligned unitPrice">12.2</td>
+                <td class="ui center aligned currentPrice">14.2</td>
+                <td class="ui center aligned priceUpdateAt">2014-11-02 22:11</td>
+                <td class="ui center aligned"><a><i class="ui delete circular link icon"></i></a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <form data-lift="AddBuyStockForm?form=ajax">
+          <table class="ui celled structured table">
+            <tbody>
+              <tr>
+                <td class="ui center algined">
+                  <select id="addBuyStockCode" data-lift="StockList">
+                    <option value=""></option>
+                    <option class="stockListItem" value=""></option>
+                  </select>
+                </td>
+                <td class="ui center aligned"><input placeholder="成交價" type="text" id="addBuyStockPrice" style="width: 10em"/></td>
+                <td class="ui center aligned"><button type="submit" id="addBuyStockButton" class="ui primary tiny button">新增</button></td>
+
+                <script type="text/javascript">
+                  $("#addBuyStockCode").select2({width: "200px", allowCler: true, placeholder: "請選擇"});
+                </script>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+      </div>
     </div>
   </div>
+  <script type="text/javascript">
+    $('.tabular.menu .item').tab();
+  </script>
 
 </body>
 </html>  

@@ -20,6 +20,118 @@ import scala.concurrent.Future
 import scala.util._
 import code.lib.DateToCalendar._
 
+object StockBuyTable extends LiftActor with ListenerManager {
+  def createUpdate = UpdateTable
+
+  def startNotification() {
+    Future {
+      notifyTarget()
+    }.onComplete { _ =>
+      Schedule(() => startNotification, 30.seconds)
+    }
+  }
+
+  def notifyTarget() {
+
+    def isReachedLimit(stockToBuy: StockToBuy): Boolean = {
+      val stockID = stockToBuy.stockID.toString
+      val currentPrice = Stock.find("code", stockID).map(_.currentPrice.get)
+      currentPrice.map(_ <= stockToBuy.unitPrice.get).openOr(false)
+    }
+
+    val notifiedList = StockToBuy.findAll("isNotified", false).filter(isReachedLimit)
+
+
+    for {
+      stockToBuy <- notifiedList
+      user       <- User.find(stockToBuy.userID.get)
+      newPrice   <- Stock.find("code", stockToBuy.stockID.toString)
+    } {
+
+      val stockName = Stock.stockCodeToName.get(stockToBuy.stockID.toString)
+                           .getOrElse(stockToBuy.stockID)
+
+      val message = s"股票 ${stockToBuy.stockID} $stockName 的成交價為 ${newPrice.currentPrice}，已到達設定的買入點 ${stockToBuy.unitPrice}"
+
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+        stockToBuy.isNotified(true).notifiedAt(now).saveTheRecord()
+      } else {
+        val newPlurk = user.postPlurk(message)
+        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
+        newPlurk.foreach { plurk =>
+          stockToBuy.isNotified(true).notifiedAt(now).saveTheRecord()
+        }
+      }
+      updateListeners()
+    }
+  }
+
+  override def lowPriority = {
+    case UpdateTable => updateListeners()
+  }
+
+  def updateStockPriceInDB(): Unit = {
+    Future {
+      Stock.updateAllPrice()
+      updateListeners()
+    }.onComplete { _ =>
+      Schedule(() => updateStockPriceInDB(), 30.seconds)
+    }
+  }
+
+  def init() {
+    updateStockPriceInDB()
+    startNotification()
+  }
+
+
+}
+
+class StockBuyTable extends CometActor with CometListener{
+
+  def registerWith = StockBuyTable
+
+  private val dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  private def stockToBuy = User.currentUser.map { user =>
+    StockToBuy.findAll("userID", user.id.get.toString).sortWith(_.stockID.get < _.stockID.get)
+  }
+
+  def onDelete(rowID: String, value: String): JsCmd = {
+    StockToBuy.delete("_id", rowID)
+    this ! UpdateTable
+  }
+
+
+  def render = {
+
+    ".row" #> stockToBuy.getOrElse(Nil).map { stock =>
+
+      def formatNotifiedTime(calendar: java.util.Calendar) = {
+        val dateTimeString = dateTimeFormatter.format(calendar.getTime)
+        <div>V</div>
+        <div>{dateTimeString}</div>
+      }
+
+      val stockInfo = Stock.find("code", stock.stockID.toString)
+      val currentPrice = stockInfo.map(_.currentPrice.get)
+      val priceUpdateAt = stockInfo.map(_.priceUpdateAt.get)
+
+      ".row [id]" #> s"stockToBuy-row-${stock.id}" &
+      ".stockName *" #> Stock.stockCodeToName.get(stock.stockID.toString).getOrElse("Unknown") &
+      ".unitPrice *" #> stock.unitPrice &
+      ".isNotified *" #> stock.notifiedAt.get.map(formatNotifiedTime) &
+      ".currentPrice *" #> currentPrice.map(_.toString).getOrElse("-") &
+      ".priceUpdateAt *" #> priceUpdateAt.map(x => dateTimeFormatter.format(x.getTime)).getOrElse("-") &
+      ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(stock.id.toString, _))
+    }
+  }
+
+  override def lowPriority = {
+    case UpdateTable => reRender(true)
+  }
+}
+
 object StockTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
@@ -84,6 +196,7 @@ object StockTable extends LiftActor with ListenerManager {
 
       if (user.nickname.get == "brianhsu") {
         PrivateMessanger.sendMessage(user, message)
+        stockInHand.isNotified(true).notifiedAt(now).saveTheRecord()
       } else {
         val newPlurk = user.postPlurk(message)
         user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))

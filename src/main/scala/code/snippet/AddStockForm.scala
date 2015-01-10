@@ -14,6 +14,7 @@ import net.liftweb.util._
 import net.liftweb.util.Helpers._
 import scala.util._
 import scala.xml.Text
+import code.comet._
 
 class AddStockForm {
 
@@ -72,14 +73,12 @@ class AddStockForm {
                                .saveTheRecord()
       } yield newRecord
 
-      import code.comet._
       newRecord match {
-        case Some(record) => 
-          S.notice("成功新增股票")
-          StockTable ! UpdateTable
-        case _ => 
-          S.error("無法存檔，請稍候再試")
+        case Some(record) => S.notice("成功新增股票")
+        case _ => S.error("無法存檔，請稍候再試")
       }
+
+      StockTable ! UpdateTable
     }
 
     val errors = List(
@@ -152,10 +151,6 @@ class AddStockForm {
 
   def render = {
 
-    ".stockListItem" #> Stock.stockTable.map { stockInfo =>
-      ".stockListItem *" #> s"[${stockInfo.code}] ${stockInfo.name}" &
-      ".stockListItem [value]" #> stockInfo.code
-    } &
     "#addStockCode [onchange]" #> SHtml.onEvent(stockCode = _) &
     "#addStockDate [onchange]" #> SHtml.onEvent(dateString = _) &
     "#addStockQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asInt(x); updateUnitPrice}) &

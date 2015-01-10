@@ -56,10 +56,10 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
       val newRecord = Gold.find("bankName", "TaiwanBank") match {
 
         case Full(record) => 
-          Gold.bankSellPrice(bankSell)
-              .bankBuyPrice(bankBuy)
-              .priceUpdateAt(lastUpdateTime)
-              .saveTheRecord()
+          record.bankSellPrice(bankSell)
+                .bankBuyPrice(bankBuy)
+                .priceUpdateAt(lastUpdateTime)
+                .saveTheRecord()
 
         case Empty =>
           Gold.createRecord
