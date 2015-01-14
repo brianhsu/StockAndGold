@@ -51,58 +51,20 @@ object GoldTable extends LiftActor with ListenerManager {
     }
   }
 
-  def notifySell(newPrice: Gold) = {
-
-    def getDifference(goldInHand: GoldInHand) = {
-      val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
-      val newTotalPrice = newPrice.bankBuyPrice.get * goldInHand.quantity.get
-      newTotalPrice - oldTotalPrice
-    }
-
-    def isReachedLimit(goldInHand: GoldInHand) = {
-      val difference = getDifference(goldInHand)
-      if (difference < 0) {
-        difference <= goldInHand.targetLoose.get.abs * -1
-      } else {
-        difference >= goldInHand.targetEarning.get
-      }
-    }
-
-    val notifiedList = GoldInHand.findAll("isNotified", false).filter(isReachedLimit)
-    for {
-      goldInHand <- notifiedList
-      user <- User.find(goldInHand.userID.get)
-    } {
-      val oldTotalPrice = goldInHand.buyPrice.get * goldInHand.quantity.get
-      val difference = getDifference(goldInHand)
-      val newTotalPrice = newPrice.bankBuyPrice.get * goldInHand.quantity.get
-
-      val message = 
-        s"買入價為 ${goldInHand.buyPrice} 的 ${goldInHand.quantity} 克黃金，" +
-        s"原價 $oldTotalPrice ，目前市值為 $newTotalPrice ，價差為 $difference，" +
-        s"已達設定停損 / 停益點 ${goldInHand.targetLoose} / ${goldInHand.targetEarning}"
-
-      if (user.nickname.get == "brianhsu") {
-        PrivateMessanger.sendMessage(user, message)
-        goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-      } else {
-        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
-        user.postPlurk(message).foreach { _ =>
-          goldInHand.isNotified(true).notifiedAt(now).saveTheRecord()
-        }
-      }
-
-      updateListeners()
-    }
-  }
-
   def notifyTarget(): Unit = {
 
     Future {
-      Gold.find("bankName", "TaiwanBank").foreach { newPrice =>
-        notifyBuy(newPrice)
-        notifySell(newPrice)
+
+      GoldInHand.findAll.foreach { goldInHand => 
+        goldInHand.notifySell()
+        updateListeners() 
       }
+
+      Gold.find("bankName", "TaiwanBank").foreach { newPrice => 
+        notifyBuy(newPrice)
+        updateListeners()
+      }
+
     }.onComplete { _ => 
       Schedule(() => notifyTarget(), 30.seconds) 
     }

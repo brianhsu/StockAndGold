@@ -62,7 +62,7 @@ class AddBuyStockForm {
       case _   => errors.foreach(S.error)
     }
 
-    StockBuyTable ! UpdateTable
+    StockTable ! UpdateTable
     Noop
 
   }
