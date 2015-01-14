@@ -5,6 +5,21 @@ import net.liftweb.mongodb.record.MongoMetaRecord
 import net.liftweb.mongodb.record.field._
 import net.liftweb.record.field._
 
+object CurrencyToBuy extends CurrencyToBuy with MongoMetaRecord[CurrencyToBuy]
+
+class CurrencyToBuy extends MongoRecord[CurrencyToBuy] with ObjectIdPk[CurrencyToBuy] {
+  def meta = CurrencyToBuy
+
+  val userID = new StringField(this, 24)
+  val code = new StringField(this, 20)
+  val unitPrice = new DecimalField(this, 2)
+  val isNotified = new BooleanField(this, false)
+  val notifiedAt = new OptionalDateTimeField(this, None)
+  val updateAt = new DateTimeField(this)
+}
+
+
+
 object StockToBuy extends StockToBuy with MongoMetaRecord[StockToBuy]
 
 class StockToBuy extends MongoRecord[StockToBuy] with ObjectIdPk[StockToBuy] {

@@ -147,10 +147,6 @@ class AddCurrencyForm {
 
   def render = {
 
-    ".currencyListItem" #> code.model.Currency.currencyList.map { currencyInfo =>
-      ".currencyListItem *" #> s"[${currencyInfo.code}] ${currencyInfo.name}" &
-      ".currencyListItem [value]" #> currencyInfo.code
-    } &
     "#addCurrencyCode [onchange]" #> SHtml.onEvent(currencyCode = _) &
     "#addCurrencyDate [onchange]" #> SHtml.onEvent(dateString = _) &
     "#addCurrencyQuantity" #> SHtml.ajaxText("", false, (x: String) => {quantity = asDouble(x); updateUnitPrice}) &
@@ -162,3 +158,5 @@ class AddCurrencyForm {
     "#addCurrencyButton" #> SHtml.ajaxOnSubmit(addCurrency _)
   }
 }
+
+

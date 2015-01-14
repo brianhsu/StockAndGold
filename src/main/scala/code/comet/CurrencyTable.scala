@@ -21,6 +21,53 @@ import scala.util._
 import code.lib.DateToCalendar._
 import java.util.Calendar
 
+class CurrencyBuyTable extends CometActor with CometListener{
+
+  def registerWith = CurrencyTable
+
+  private val dateTimeFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm")
+  private def currencyToBuy = User.currentUser.map { user =>
+    CurrencyToBuy.findAll("userID", user.id.get.toString)
+  }
+
+  def onDelete(rowID: String, value: String): JsCmd = {
+    CurrencyToBuy.delete("_id", rowID)
+    this ! UpdateTable
+  }
+
+  def render = {
+
+    ".row" #> currencyToBuy.getOrElse(Nil).map { currency =>
+
+      def formatNotifiedTime(calendar: java.util.Calendar) = {
+        val dateTimeString = dateTimeFormatter.format(calendar.getTime)
+        <div>V</div>
+        <div>{dateTimeString}</div>
+      }
+
+      val currencyInfo = Currency.find("code", currency.code.toString)
+      val currentPrice = currencyInfo.map(_.bankSellPrice.get)
+      val priceUpdateAt = currencyInfo.map(_.priceUpdateAt.get)
+      val currencyName = Currency.currencyCodeToName
+                                 .get(currency.code.toString)
+                                 .getOrElse("Unknown")
+ 
+      ".row [id]" #> s"currencyToBuy-row-${currency.id}" &
+      ".name *" #> currencyName &
+      ".unitPrice *" #> currency.unitPrice &
+      ".isNotified *" #> currency.notifiedAt.get.map(formatNotifiedTime) &
+      ".currentPrice *" #> currentPrice.map(_.toString).getOrElse("-") &
+      ".priceUpdateAt *" #> priceUpdateAt.map(x => dateTimeFormatter.format(x.getTime)).getOrElse("-") &
+      ".delete [onclick]" #> SHtml.onEventIf("確定要刪除嗎？", onDelete(currency.id.toString, _))
+    }
+  }
+
+  override def lowPriority = {
+    case UpdateTable => reRender(true)
+  }
+}
+
+
 object CurrencyTable extends LiftActor with ListenerManager {
 
   def createUpdate = UpdateTable
@@ -32,6 +79,7 @@ object CurrencyTable extends LiftActor with ListenerManager {
   def startNotification() {
     Future {
       notifyTarget()
+      notifyTarget2()
     }.onComplete { _ =>
       Schedule(() => startNotification, 30.seconds)
     }
@@ -91,6 +139,48 @@ object CurrencyTable extends LiftActor with ListenerManager {
     }
   }
 
+  def notifyTarget2() {
+
+    def isReachedLimit(currencyToBuy: CurrencyToBuy): Boolean = {
+
+      val currencyCode = currencyToBuy.code.toString
+      val bankSellPrice = Currency.find("code", currencyCode).map(_.bankSellPrice.get)
+      val isReachedLimitBox = bankSellPrice.map { bankSell =>
+        bankSell <= currencyToBuy.unitPrice.get
+      }
+
+      isReachedLimitBox.openOr(false)
+    }
+
+    val notifiedList = CurrencyToBuy.findAll("isNotified", false).filter(isReachedLimit)
+
+    for {
+      currencyToBuy  <- notifiedList
+      user            <- User.find(currencyToBuy.userID.get)
+      newPrice        <- Currency.find("code", currencyToBuy.code.toString)
+    } {
+
+      val currencyName = Currency.currencyCodeToName.get(currencyToBuy.code.toString)
+                                 .getOrElse(currencyToBuy.code)
+
+      val message = 
+        s"$currencyName 的銀行賣出價為 ${newPrice.bankSellPrice} ，已達設定的買入點 ${currencyToBuy.unitPrice}"
+
+      if (user.nickname.get == "brianhsu") {
+        PrivateMessanger.sendMessage(user, message)
+        currencyToBuy.isNotified(true).notifiedAt(now).saveTheRecord()
+      } else {
+
+        val newPlurk = user.postPlurk(message)
+        user.xmppAddress.get.foreach(address => XMPPMessanger.send(address, message))
+        newPlurk.foreach { plurk =>
+          currencyToBuy.isNotified(true).notifiedAt(now).saveTheRecord()
+        }
+      }
+      updateListeners()
+    }
+  }
+
   def updateCurrencyPrice(): Unit = {
     Future {
       val calendar = Calendar.getInstance
@@ -99,7 +189,7 @@ object CurrencyTable extends LiftActor with ListenerManager {
       if (hour >= 8 && hour <= 17) {
         Currency.updateAllPrice()
       }
-
+ 
       updateListeners()
     }.onComplete { _ =>
       Schedule(() => updateCurrencyPrice(), 30.seconds)

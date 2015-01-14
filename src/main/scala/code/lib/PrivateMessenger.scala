@@ -36,12 +36,11 @@ object PrivateMessanger {
   private val appSecret = Props.get("PLURK_APISECRET").openOr("")
   private val accessToken = Props.get("PLURK_ACCESS_TOKEN").openOr("")
   private val accessSecret = Props.get("PLURK_ACCESS_SECRET").openOr("")
-  private val smsAuthID = Props.get("SMS_AUTH_ID").openOr("")
-  private val smsAuthToken = Props.get("SMS_AUTH_TOKEN").openOr("")
-
   val plurkAPI = PlurkAPI.withAccessToken(appKey, appSecret, accessToken, accessSecret)
 
   def sendSMSMessage(message: String) = Try {
+    val smsAuthID = Props.get("SMS_AUTH_ID").openOr("")
+    val smsAuthToken = Props.get("SMS_AUTH_TOKEN").openOr("")
     val api = new RestAPI(smsAuthID, smsAuthToken, "v1")
     val params = new LinkedHashMap[String, String]
     params.put("src", Props.get("SMS_FROM").openOr(""))
