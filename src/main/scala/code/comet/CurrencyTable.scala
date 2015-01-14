@@ -19,6 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util._
 import code.lib.DateToCalendar._
+import java.util.Calendar
 
 object CurrencyTable extends LiftActor with ListenerManager {
 
@@ -92,7 +93,13 @@ object CurrencyTable extends LiftActor with ListenerManager {
 
   def updateCurrencyPrice(): Unit = {
     Future {
-      Currency.updateAllPrice()
+      val calendar = Calendar.getInstance
+      val hour = calendar.get(Calendar.HOUR_OF_DAY)
+
+      if (hour >= 8 && hour <= 17) {
+        Currency.updateAllPrice()
+      }
+
       updateListeners()
     }.onComplete { _ =>
       Schedule(() => updateCurrencyPrice(), 30.seconds)

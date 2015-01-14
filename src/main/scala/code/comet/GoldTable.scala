@@ -20,6 +20,7 @@ import org.bone.soplurk.constant.Qualifier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util._
+import java.util.Calendar
 
 case object UpdateTable
 
@@ -109,7 +110,14 @@ object GoldTable extends LiftActor with ListenerManager {
 
   def updateGoldPriceInDB(): Unit = {
     Future {
-      Gold.updateNewPrice()
+
+      val calendar = Calendar.getInstance
+      val hour = calendar.get(Calendar.HOUR_OF_DAY)
+
+      if (hour >= 8 && hour <= 21) {
+        Gold.updateNewPrice()
+      }
+
       updateListeners()
     }.onComplete { _ =>
       Schedule(() => updateGoldPriceInDB(), 3.minutes)

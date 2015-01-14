@@ -19,6 +19,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util._
 import code.lib.DateToCalendar._
+import java.util.Calendar
 
 object StockBuyTable extends LiftActor with ListenerManager {
   def createUpdate = UpdateTable
@@ -73,7 +74,14 @@ object StockBuyTable extends LiftActor with ListenerManager {
 
   def updateStockPriceInDB(): Unit = {
     Future {
-      Stock.updateAllPrice()
+
+      val calendar = Calendar.getInstance
+      val hour = calendar.get(Calendar.HOUR_OF_DAY)
+
+      if (hour >= 9 && hour <= 14) {
+        Stock.updateAllPrice()
+      }
+
       updateListeners()
     }.onComplete { _ =>
       Schedule(() => updateStockPriceInDB(), 30.seconds)
