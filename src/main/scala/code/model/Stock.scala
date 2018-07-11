@@ -1508,7 +1508,7 @@ object Stock extends Stock with MongoMetaRecord[Stock] {
 
   def updatePrice(stockCode: String) = {
 
-    val infoURL = s"http://www.google.com/finance/info?infotype=infoquoteall&q=TPE:$stockCode"
+    val infoURL = s"https://www.google.com/finance/info?infotype=infoquoteall&q=TPE:$stockCode"
     val htmlData = DataGetter(infoURL)
 
     def updatePriceInDB(responseContent: String) = Try {

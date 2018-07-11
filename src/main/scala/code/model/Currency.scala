@@ -56,13 +56,13 @@ object Currency extends Currency with MongoMetaRecord[Currency] {
       def extractCsvURL(line: String) = {
         val htmlNode = scala.xml.XML.loadString(line.trim)
         val csvURL = (htmlNode \\ "@href").text
-        s"http://rate.bot.com.tw/${csvURL}"
+        s"https://rate.bot.com.tw/${csvURL}"
       }
 
       targetLine.map(extractCsvURL)
     }
 
-    val rateHTML = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm")
+    val rateHTML = DataGetter("https://rate.bot.com.tw/Pages/Static/UIP003.zh-TW.htm")
 
     for {
       htmlData <- rateHTML

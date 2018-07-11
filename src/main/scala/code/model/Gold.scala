@@ -42,7 +42,7 @@ object Gold extends Gold with MongoMetaRecord[Gold] {
       }
     }
 
-    val htmlData = DataGetter("http://rate.bot.com.tw/Pages/Static/UIP005.zh-TW.htm")
+    val htmlData = DataGetter("https://rate.bot.com.tw/Pages/Static/UIP005.zh-TW.htm")
 
     for {
       content <- htmlData
